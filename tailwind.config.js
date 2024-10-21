@@ -9,24 +9,28 @@ module.exports = {
   ],
   theme: {
   	extend: {
-		keyframes: {
-			bounceDown: {
-				'0%, 100%': { transform: 'translateY(0)' },
-				'50%': { transform: 'translateY(10px)' },
-			},
-		},
-		animation: {
-			bounceDown: 'bounceDown 1.5s infinite',
-		},
-		animationDelay:{
-			'1s': '1s',
-			'2s': '2s',
-			'3s': '3s',
-		},
-		fontFamily: {
+  		keyframes: {
+  			bounceDown: {
+  				'0%, 100%': {
+  					transform: 'translateY(0)'
+  				},
+  				'50%': {
+  					transform: 'translateY(10px)'
+  				}
+  			}
+  		},
+  		animation: {
+  			bounceDown: 'bounceDown 1.5s infinite'
+  		},
+  		animationDelay: {
+  			'1s': '1s',
+  			'2s': '2s',
+  			'3s': '3s'
+  		},
+  		fontFamily: {
   			teko: ['Teko', 'sans-serif'],
-			dancing: ['Dancing Script', 'cursive'],
-			silk: ['Silkscreen', 'sans-serif']
+  			dancing: ['Dancing Script', 'cursive'],
+  			silk: ['Silkscreen', 'sans-serif']
   		},
   		backgroundImage: {
   			'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

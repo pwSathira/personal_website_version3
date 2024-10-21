@@ -1,13 +1,24 @@
 
 import {FaLinkedin, FaTwitter, FaFilePdf, FaEnvelope} from 'react-icons/fa';
+import CopyButton from "@/components/ui/CopyButton";
 
 export default function About() {
     return (
-        <section id="about" className="min-h-screen p-10 bg-gray-800 text-white flex flex-col items-center justify-center">
+        <section id="about"
+                 className="min-h-screen p-10 bg-gray-800 text-white flex flex-col items-center justify-center">
             <h2 className="text-4xl font-bold mb-6">About Me</h2>
             <p className="text-lg max-w-2xl text-center mb-8">
-                Hey! I am a passionate software engineering, who loves to build software solutions both front-end and back-end. I am always looking for new opportunities to learn and grow. I am studying fulltime at York University and I am looking for any oppurtunity to help me grow as a developer!
+                Hey, I'm Sathira! I am a fullstack software engineer based in Toronto, Canada. I am currently studying
+                at York University as a Software Engineering student.
             </p>
+            <p className="text-lg max-w-2xl text-center mb-8"> I am passionate about building software solutions and
+                learning new technologies. I am always looking for new opportunities to learn and grow as a developer.
+                Feel free to reach out to me on my email:
+            </p>
+            <div className="flex items-center space-x-2 mb-8 bg-gray-900 rounded-md">
+                <p className="text-xl m-2">sathira.williams@gmail.com</p>
+                <CopyButton text="sathira.williams@gmail.com"/>
+            </div>
             {/*<p className="text-lg max-w-2xl text-center mb-8">*/}
             {/*    My twitter contains a daily log of my progress learning new technologies and building projects. I am always looking for new projects to work on and new people to connect with. Feel free to reach out to me on any of my social media platforms!*/}
             {/*</p>*/}
@@ -42,7 +53,7 @@ export default function About() {
                     <FaEnvelope size={36}/>
                 </a>
                 <a
-                    href="https://twitter.com/@pwSathira"
+                    href="https://twitter.com/@Sathira_"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-white hover:text-blue-400 transition-colors duration-200"
