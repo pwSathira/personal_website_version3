@@ -16,8 +16,8 @@ export default function About() {
                 />
             <h2 className="text-4xl font-bold mb-6">About Me</h2>
             <p className="text-lg max-w-2xl text-center mb-8">
-                Hey, I'm Sathira! I am a fullstack software engineer based in Toronto, Canada. I am currently studying
-                at York University as a Software Engineering student.
+                {`Hey, I'm Sathira! I am a fullstack software engineer based in Toronto, Canada. I am currently studying
+                at York University as a Software Engineering student.`}
             </p>
             <p className="text-lg max-w-2xl text-center mb-8"> I am passionate about building software solutions and
                 learning new technologies. I am always looking for new opportunities to learn and grow as a developer.
