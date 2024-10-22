@@ -1,7 +1,6 @@
 "use client";
 import Image from "next/image";
 import 'animate.css';
-import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 import Projects from "@/components/Projects";
 import About from "@/components/About";
@@ -27,24 +26,23 @@ export default function Home() {
                     </h3>
                 </div>
                 <div className="mt-10">
-                    <Button
-                        size="lg"
-                        variant="ghost"
+                    <ChevronDown
+                        className="w-20 h-8 animate-bounceDown delay-1s cursor-pointer border
+                        border-input hover:bg-accent hover:text-accent-foreground hover:border-transparent rounded-md"
                         onClick={() => {
-                            document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' });
+                            document.getElementById('projects')?.scrollIntoView({behavior: 'smooth'});
                         }}
-                    >
-                        <ChevronDown className="h-7 w-7 animate-bounceDown delay-1s" />
-                    </Button>
+                    />
                 </div>
+
             </section>
             {/* Projects Section */}
             <section id="projects" className="min-h-screen p-20 bg-gray-900 text-white">
-                <Projects />
+                <Projects/>
             </section>
             {/* About Section */}
             <section id="about" className="min-h-screen p-20 bg-gray-800 text-white">
-                <About />
+                <About/>
             </section>
 
         </div>
