@@ -4,6 +4,7 @@ import 'animate.css';
 import { ChevronDown } from "lucide-react";
 import Projects from "@/components/Projects";
 import About from "@/components/About";
+import BlurFade from "@/components/ui/blur-fade";
 
 export default function Home() {
     return (
@@ -18,22 +19,34 @@ export default function Home() {
                     loading="eager"
                 />
                 <div className="text-center mt-10">
+                    <BlurFade delay={0.6} inView>
                     <h2 className="text-6xl tracking-wider mb-2 font-teko">
                         SATHIRA WILLIAMS
                     </h2>
-                    <h3 className="text-2xl font-light font-silk">
+                    </BlurFade>
+                    <BlurFade delay={0.8} inView>
+                    <h3 className="text-2xl font-light font-silk mb-2">
                         Software Engineer & Fullstack Developer
                     </h3>
+                    </BlurFade>
+                    <BlurFade delay={0.9} inView>
+                        <h3 className="text-s font-light font-silk flex items-center justify-center">
+                            <Image src="/location.svg" alt="Location" width={20} height={20} className="mr-3" />
+                            Based in Toronto, Canada
+                        </h3>
+                    </BlurFade>
                 </div>
-                <div className="mt-10">
-                    <ChevronDown
-                        className="w-20 h-8 animate-bounceDown delay-1s cursor-pointer border
+                <BlurFade delay={1}>
+                    <div className="mt-10">
+                        <ChevronDown
+                            className="w-20 h-8 animate-bounceDown delay-1s cursor-pointer border
                         border-input hover:bg-accent hover:text-accent-foreground hover:border-transparent rounded-md"
                         onClick={() => {
                             document.getElementById('projects')?.scrollIntoView({behavior: 'smooth'});
                         }}
                     />
                 </div>
+                </BlurFade>
 
             </section>
             {/* Projects Section */}
