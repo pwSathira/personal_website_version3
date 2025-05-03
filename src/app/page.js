@@ -32,7 +32,7 @@ export default function Home() {
                     <BlurFade delay={0.9} inView>
                         <h3 className="text-s font-light font-silk flex items-center justify-center">
                             <Image src="/location.svg" alt="Location" width={20} height={20} className="mr-3" />
-                            Based in Toronto, Canada
+                            Based in Vancouver, Canada
                         </h3>
                     </BlurFade>
                 </div>
