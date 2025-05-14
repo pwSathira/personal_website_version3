@@ -1,6 +1,7 @@
 // components/Projects.js
 
 import { useState } from "react";
+import Image from "next/image";
 import BlurFade from "@/components/ui/blur-fade";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaGlobe, FaGithub } from "react-icons/fa";
@@ -128,7 +129,13 @@ export default function Projects() {
               >
                 <div className="h-56 bg-gradient-to-tr from-red-400 to-pink-400 flex items-center justify-center rounded-lg mb-6">
                   {selectedProject.image && (
-                    <img src={selectedProject.image} alt={selectedProject.name} className="object-contain h-48 w-full" />
+                    <Image
+                      src={selectedProject.image}
+                      alt={selectedProject.name}
+                      width={500}
+                      height={192}
+                      className="object-contain h-48 w-full"
+                    />
                   )}
                 </div>
                 <h3 className="text-3xl font-semibold mb-1">{selectedProject.name}</h3>
