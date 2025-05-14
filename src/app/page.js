@@ -5,10 +5,16 @@ import { ChevronDown } from "lucide-react";
 import Projects from "@/components/Projects";
 import About from "@/components/About";
 import BlurFade from "@/components/ui/blur-fade";
+import LatestBlogs from "@/components/LatestBlogs";
+import { motion } from "framer-motion";
 
 export default function Home() {
     return (
         <div>
+             <BlurFade delay={0.6} inView>
+                <LatestBlogs />
+             </BlurFade>
+
             <section id="home" className="flex flex-col items-center justify-center h-screen">
                 <Image
                     className="animate__animated animate__backInDown"
@@ -18,6 +24,7 @@ export default function Home() {
                     height={150}
                     loading="eager"
                 />
+               
                 <div className="text-center mt-10">
                     <BlurFade delay={0.6} inView>
                     <h2 className="text-6xl tracking-wider mb-2 font-teko">

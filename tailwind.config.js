@@ -17,10 +17,20 @@ module.exports = {
   				'50%': {
   					transform: 'translateY(10px)'
   				}
-  			}
+  			},
+  			marquee: {
+  				from: { transform: 'translateX(0)' },
+  				to: { transform: 'translateX(calc(-100% - var(--gap)))' },
+  			},
+  			'marquee-vertical': {
+  				from: { transform: 'translateY(0)' },
+  				to: { transform: 'translateY(calc(-100% - var(--gap)))' },
+  			},
   		},
   		animation: {
-  			bounceDown: 'bounceDown 1.5s infinite'
+  			bounceDown: 'bounceDown 1.5s infinite',
+  			'marquee': 'marquee var(--duration) linear infinite',
+  			'marquee-vertical': 'marquee-vertical var(--duration) linear infinite',
   		},
   		animationDelay: {
   			'1s': '1s',
