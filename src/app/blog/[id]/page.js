@@ -24,6 +24,21 @@ async function getPost(id) {
     }
 }
 
+export async function generateMetadata({ params }) {
+  const post = await getPost(params.id);
+  
+  if (!post) {
+    return {
+      title: 'Post Not Found | Sathira Williams',
+    };
+  }
+  
+  return {
+    title: `${post.title} | Sathira Williams`,
+    description: post.description || 'Blog post by Sathira Williams',
+  };
+}
+
 function formatDate(dateString) {
     const date = new Date(dateString);
     const month = date.toLocaleString('default', { month: 'short' });
