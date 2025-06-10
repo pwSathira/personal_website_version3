@@ -36,7 +36,7 @@ const LatestBlog = () => {
         <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="absolute top-[20%] right-8 w-[320px] rounded-xl bg-black/40 backdrop-blur-lg p-4 shadow-2xl border border-white/10"
+            className="absolute top-[20%] right-8 w-[320px] rounded-xl bg-black/30 backdrop-blur-lg p-4 shadow-2xl border border-white/10"
         >
             <div className="relative">
                 <div className="flex items-center justify-between mb-4 group">

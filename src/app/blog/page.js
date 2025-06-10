@@ -57,6 +57,7 @@ export default function Blog() {
     return (
         <div className="min-h-screen bg-gray-900">
             <div className="container mx-auto px-4 py-16">
+                <BlurFade delay={0.2} inView>
                 <div className="mb-8">
                     <input
                         type="text"
@@ -66,16 +67,7 @@ export default function Blog() {
                         className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:border-blue-500 focus:outline-none"
                     />
                 </div>
-                
-                {isLoading ? (
-                    <div className="text-center text-white py-10">
-                        <p className="text-xl">Loading posts...</p>
-                    </div>
-                ) : filteredPosts.length === 0 ? (
-                    <div className="text-center text-white py-10">
-                        <p className="text-xl">No posts found matching your search.</p>
-                    </div>
-                ) : (
+                </BlurFade>
                     <div className="grid gap-8">
                         {filteredPosts.map((post) => {
                             const { month, day, year } = formatDate(post.date);
@@ -108,7 +100,6 @@ export default function Blog() {
                             );
                         })}
                     </div>
-                )}
             </div>
         </div>
     );
