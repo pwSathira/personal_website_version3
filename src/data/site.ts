@@ -8,7 +8,7 @@ export const site = {
   role: 'Full-stack developer',
   // One sentence under the name. Keep it to what a recruiter can verify.
   intro:
-    'I build web apps end to end. Most recently I rebuilt the scheduler behind Star-Sync, a satellite ground-station planner that started as my capstone for the Canadian Space Agency, and put the whole app online as a static demo.',
+    'I build and maintain web applications end to end. My work spans production web development, satellite scheduling, and tools people use to learn.',
   status: { open: true, text: 'Open to full-stack roles', where: 'Vancouver or remote' },
   // Swap for '/Sathira_Williams_Resume.pdf' once a general full-stack PDF from CV Tailor is in public/.
   resumeUrl: 'https://drive.google.com/file/d/1AfqHo7Ysz6C7jYDawVSYnAzfehm02uEb/view',

@@ -1,5 +1,4 @@
 ---
-import GroundTrack from './GroundTrack.astro';
 import { basics } from '../lib/cv';
 import Logo from './Logo.astro';
 
@@ -13,7 +12,8 @@ const { station, status } = basics;
       <h1 id="hero-name"><span class="line"><span>Sathira</span></span> <span class="line"><span>Williams</span></span></h1>
     </div>
     <div class="side">
-      <p class="role label">{basics.role} · {station.name}</p>
+      <p class="label">{station.name} · Available for full-stack roles</p>
+      <h2 class="role">Full-stack developer.<br />From interface to infrastructure.</h2>
       <p class="intro">{basics.intro}</p>
       {
         status.open && (
@@ -31,7 +31,11 @@ const { station, status } = basics;
     </div>
   </div>
 
-  <GroundTrack />
+  <div class="proof" aria-label="Background at a glance">
+    <p><span class="label">Currently</span><strong>Full-Stack Developer</strong><span>Verus Human Optimization</span></p>
+    <p><span class="label">Selected work</span><strong>Canadian Space Agency capstone</strong><span>Satellite scheduling · Next.js + FastAPI</span></p>
+    <p><span class="label">Education</span><strong>Georgia Tech · M.S. Computer Science</strong><span>In progress · Artificial Intelligence</span></p>
+  </div>
 </section>
 
 <style>
@@ -81,10 +85,17 @@ const { station, status } = basics;
     max-width: 52ch;
   }
   .role {
-    color: var(--accent);
+    font-size: clamp(1.8rem, 3.1vw, 2.75rem);
+    line-height: 1.08;
+    letter-spacing: -0.035em;
   }
+  .proof { display: grid; gap: 24px; padding-block: 24px; border-block: 1px solid var(--rule-strong); }
+  .proof p { display: flex; flex-direction: column; gap: 5px; font-size: 0.875rem; color: var(--ink-2); }
+  .proof strong { font-weight: 560; color: var(--ink); }
+  @media (min-width: 760px) { .proof { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
   .intro {
-    font-size: 1.1875rem;
+    font-size: 1.0625rem;
     line-height: 1.5;
   }
   .status {
@@ -112,11 +123,11 @@ const { station, status } = basics;
     .head {
       grid-template-columns: auto minmax(0, 1fr);
       align-items: center;
-      gap: clamp(40px, 5vw, 80px);
+      gap: clamp(32px, 4vw, 64px);
     }
     /* Capped so the text column keeps ~46ch once the page hits max width. */
     .lockup {
-      --size: clamp(3rem, 8.4vw, 7rem);
+      --size: clamp(3rem, 7.3vw, 6rem);
     }
     .side {
       justify-self: end;

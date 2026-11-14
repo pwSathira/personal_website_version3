@@ -1,5 +1,9 @@
 ---
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import schedule from '../assets/missions/star-sync-schedule.png';
+import login from '../assets/missions/blue-link-login.png';
+import GroundTrack from './GroundTrack.astro';
 
 const missions = (await getCollection('missions')).sort((a, b) => a.data.order - b.data.order);
 ---
@@ -16,7 +20,17 @@ const missions = (await getCollection('missions')).sort((a, b) => a.data.order -
       missions.map(({ id, data }) => {
         const demo = data.links.find((l) => /demo|ankiweb/i.test(l.label));
         return (
-          <li class="row">
+          <li class:list={['row', { featured: id === 'star-sync' }]}>
+            <a class:list={['preview', id]} href={`/missions/${id}`} tabindex="-1" aria-hidden="true">
+              {id === 'star-sync' ? <Image src={schedule} alt="" widths={[640, 1200]} sizes="(min-width: 960px) 75vw, 100vw" /> : id === 'blue-link' ? <Image src={login} alt="" widths={[480, 800]} sizes="(min-width: 960px) 40vw, 100vw" /> : (
+                <div class="audio-preview">
+                  <span class="data">.apkg → audio files</span>
+                  <div class="wave" aria-hidden="true">{[16,32,22,48,66,38,80,54,30,68,90,52,36,60,28,44,18].map(h => <i style={`height:${h}px`} />)}</div>
+                  <span class="audio-files data">a.mp3 &nbsp; ka.mp3 &nbsp; sa.ogg</span>
+                </div>
+              )}
+              <span class="preview-label label">{id === 'star-sync' ? 'Featured project · Satellite scheduling' : id === 'blue-link' ? 'Java desktop application' : 'Anki add-on + desktop app'}</span>
+            </a>
             <span class="code data">{data.code}</span>
             <div class="main">
               <h3>
@@ -25,6 +39,7 @@ const missions = (await getCollection('missions')).sort((a, b) => a.data.order -
                 </a>
               </h3>
               <p class="summary">{data.summary}</p>
+              <p class="ownership data">{data.role}</p>
               <p class="stack data">{data.stack.slice(0, 6).join(' · ')}</p>
             </div>
             <div class="readout">
@@ -38,136 +53,54 @@ const missions = (await getCollection('missions')).sort((a, b) => a.data.order -
                   {demo.label} ↗
                 </a>
               )}
-              <span class="go" aria-hidden="true">Read →</span>
+              <a class="go" href={`/missions/${id}`} aria-label={`Read the ${data.title} case study`}>Case study →</a>
             </div>
           </li>
         );
       })
     }
   </ol>
+  <div class="live-work">
+    <div class="live-intro">
+      <div><span class="label">In orbit · A working example</span><h3>The engineering behind the interface.</h3></div>
+      <p>This live satellite track uses the same orbital library as the Star-Sync demo. <a href="/missions/star-sync">Explore the scheduler →</a></p>
+    </div>
+    <GroundTrack />
+  </div>
 </section>
 
 <style>
-  .list {
-    list-style: none;
-    padding: 0;
-    border-top: 1px solid var(--rule);
-  }
-  .row {
-    position: relative;
-    display: grid;
-    grid-template-columns: 64px minmax(0, 1fr);
-    gap: 14px 20px;
-    padding: 26px 0;
-    border-bottom: 1px solid var(--rule);
-  }
-  /* Accent rule that draws in on hover. */
-  .row::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: -1px;
-    height: 1px;
-    width: 100%;
-    background: var(--accent);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.45s var(--ease);
-  }
-  .row:hover::before,
-  .row:focus-within::before {
-    transform: scaleX(1);
-  }
-  .code {
-    color: var(--ink-3);
-    padding-top: 0.55em;
-  }
-  .row:hover .code {
-    color: var(--accent);
-  }
-  h3 {
-    font-size: clamp(1.6rem, 3.4vw, 2.4rem);
-    letter-spacing: -0.03em;
-  }
-  .stretch {
-    text-decoration: none;
-  }
-  .stretch::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-  }
-  .row:hover h3 a {
-    color: var(--ink);
-  }
-  .summary {
-    margin-top: 8px;
-    color: var(--ink-2);
-    max-width: 58ch;
-  }
-  .stack {
-    margin-top: 12px;
-    color: var(--ink-3);
-  }
-  .readout,
-  .meta {
-    grid-column: 2;
-  }
-  .readout {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .value {
-    font-family: var(--font-data);
-    font-size: 1.375rem;
-    letter-spacing: -0.02em;
-    font-variant-numeric: tabular-nums;
-  }
-  .meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px 18px;
-  }
-  .ext {
-    position: relative;
-    z-index: 1;
-  }
-  .go {
-    margin-left: auto;
-    color: var(--ink-3);
-    transition:
-      transform 0.3s var(--ease),
-      color 0.3s;
-  }
-  .row:hover .go {
-    color: var(--accent);
-    transform: translateX(4px);
-  }
+  .live-work { margin-top: 56px; }
+  .live-intro { display: flex; flex-wrap: wrap; gap: 20px 48px; justify-content: space-between; margin-bottom: 24px; }
+  .live-intro h3 { margin-top: 10px; font-size: 1.6rem; }
+  .live-intro p { max-width: 46ch; color: var(--ink-2); }
+  .list { list-style: none; padding: 0; display: grid; gap: 40px; }
+  .row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; padding-bottom: 28px; border-bottom: 1px solid var(--rule-strong); min-width: 0; }
+  .preview { display: flex; flex-direction: column; text-decoration: none; background: var(--bg-raised); border: 1px solid var(--rule); overflow: hidden; }
+  .preview img { width: 100%; height: 260px; object-fit: contain; padding: 24px; transition: transform 0.45s var(--ease); }
+  .row:hover .preview img { transform: scale(1.025); }
+  .preview-label { padding: 12px 16px; border-top: 1px solid var(--rule); }
+  .star-sync { background: color-mix(in srgb, var(--accent) 6%, var(--bg-raised)); }
+  .blue-link { background: #073642; }
+  .blue-link .preview-label { color: #b7d3cc; border-color: #1d5a68; }
+  .audio-preview { height: 260px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 24px; color: var(--ink-2); }
+  .wave { height: 90px; display: flex; align-items: center; gap: clamp(4px, 1vw, 10px); }
+  .wave i { width: 6px; border-radius: 4px; background: var(--accent); }
+  .code { color: var(--ink-3); }
+  h3 { font-size: clamp(1.7rem, 3.4vw, 2.6rem); letter-spacing: -0.035em; }
+  h3 a { text-decoration: none; }
+  .summary { margin-top: 12px; color: var(--ink-2); max-width: 58ch; }
+  .ownership { margin-top: 16px; color: var(--ink); }
+  .stack { margin-top: 6px; color: var(--ink-3); }
+  .readout { display: flex; flex-direction: column; gap: 4px; }
+  .value { font-size: 2rem; color: var(--accent); letter-spacing: -0.04em; }
+  .meta { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+  .go { margin-left: auto; color: var(--ink); }
   @media (min-width: 960px) {
-    .row {
-      grid-template-columns: 88px minmax(0, 1fr) 220px 150px;
-      gap: 32px;
-      padding: 34px 0;
-    }
-    .readout,
-    .meta {
-      grid-column: auto;
-    }
-    .readout {
-      padding-top: 0.5em;
-    }
-    .meta {
-      flex-direction: column;
-      align-items: flex-end;
-      text-align: right;
-      padding-top: 0.6em;
-    }
-    .go {
-      margin-left: 0;
-      margin-top: auto;
-    }
+    .list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 32px; }
+    .featured { grid-column: 1 / -1; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 16px 36px; }
+    .featured .preview { grid-column: 1; grid-row: 1 / 6; }
+    .featured .preview img { height: 100%; min-height: 300px; padding: 28px; }
+    .featured .code, .featured .main, .featured .readout, .featured .meta { grid-column: 2; }
   }
 </style>

@@ -495,10 +495,10 @@ p {
    visible without JavaScript. Keep these selectors in step with motion.ts. */
 html.motion {
   & .hero .side > *,
-  & .gt-head > span,
-  & .gt-readouts > div,
-  & .gt-passes,
-  & .gt figcaption,
+  & .hero .gt-head > span,
+  & .hero .gt-readouts > div,
+  & .hero .gt-passes,
+  & .hero .gt figcaption,
   & .section-head .label,
   & .section-head h2,
   & .section-head p,

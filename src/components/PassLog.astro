@@ -25,7 +25,7 @@ const other = all.filter((p) => p.lane === 'other');
   <div class="section-head">
     <span class="label">02 · Pass log</span>
     <h2 id="pass-log-title">Experience</h2>
-    <p>Every role and degree since 2020 on one timeline, with the software work in detail below.</p>
+    <p>Production development, a Canadian Space Agency capstone, and a foundation in software engineering.</p>
   </div>
 
   <div class="timeline" aria-hidden="true">
@@ -70,8 +70,9 @@ const other = all.filter((p) => p.lane === 'other');
             <div>
               <h3>{p.title}</h3>
               <p class="org">{p.org}</p>
+              {p.bullets[0] && <p class="highlight">{p.bullets[0]}</p>}
               <ul>
-                {p.bullets.map((b) => (
+                {p.bullets.slice(1).map((b) => (
                   <li>{b}</li>
                 ))}
               </ul>
@@ -96,7 +97,7 @@ const other = all.filter((p) => p.lane === 'other');
         }
       </ul>
 
-      <h3 class="label">Also</h3>
+      <h3 class="label">Other experience</h3>
       <ul class="also">
         {
           other.map((p) => (
@@ -117,6 +118,7 @@ const other = all.filter((p) => p.lane === 'other');
 </section>
 
 <style>
+  .highlight { margin-top: 16px; padding-left: 16px; border-left: 2px solid var(--accent); color: var(--ink); }
   .timeline {
     --name: 0px;
     position: relative;
