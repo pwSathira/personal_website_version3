@@ -1,44 +1,53 @@
-# pwsathira.polywertz.com
+# My personal website
 
-Source for Sathira Williams's portfolio. It's a static Astro site with about 5 KB of JavaScript, which draws the live satellite ground track on the homepage.
+My portfolio, built with Astro and TypeScript. It has my projects, work experience, and write-ups about what I built, the decisions I made, and what I'd do differently.
 
-## Commands
+**[Visit the site →](https://pwsathira.polywertz.com)**
 
-| Command | What it does |
+## Running it locally
+
+You'll need Node.js 22.18 or newer.
+
+```sh
+npm ci
+npm run dev
+```
+
+The site runs at `http://localhost:4321`.
+
+```sh
+npm run check   # Type checks and orbit validation
+npm run build   # Build the static site into dist/
+npm run preview # Preview the production build
+```
+
+## What's on the site
+
+- **Star-Sync:** a satellite ground-station scheduler that started as my Canadian Space Agency capstone. I later rebuilt the scheduler and made a browser demo.
+- **Anki Audio Extractor:** a tool I made to pull audio out of Anki decks, available as an add-on and a desktop app.
+- **Blue-Link:** a Java desktop prototype for managing records, with an interface I designed in Illustrator and a database on Azure.
+
+There's also a live satellite map. It tracks RCM-1 and shows its upcoming passes over Vancouver. The orbital data comes from CelesTrak at build time, and the browser calculates the position. If the fetch fails, the build uses the saved data.
+
+## Making changes
+
+| What to change | Where to look |
 | --- | --- |
-| `npm run dev` | Starts the dev server at `localhost:4321`. |
-| `npm run build` | Fetches a fresh TLE, then builds the site into `dist/`. |
-| `npm run check` | Type-checks the project and compares the orbit propagator with SGP4. |
-| `npm run sync:cv` | Copies the master CV from CV Tailor into `src/data/cv.json`. |
-| `npm run build:map` | Rebuilds the land mask for the hero map. You only need this if you change `src/lib/map.ts`. |
+| Intro, availability, project summaries, and experience copy | `src/data/site.ts` |
+| Project case studies | `src/content/missions/` |
+| Homepage sections | `src/components/` |
+| Colours, typography, and shared styles | `src/styles/global.css` |
+| Page layout and navigation | `src/layouts/Base.astro` |
+| Print-friendly résumé | `src/pages/resume.astro` |
 
-You need Node.js 22.18 or later, because the scripts in `scripts/` are TypeScript files run directly by Node.
+I keep the master CV in a separate CV Tailor project. `npm run sync:cv` copies its content into `src/data/cv.json` without the phone number. Set `CV_PATH` if your copy lives somewhere else. The website-specific wording and choices stay in `src/data/site.ts`.
 
-## Where the content lives
+The downloadable résumé is `public/Sathira_Williams_Resume.pdf`. After changing the résumé content, open `/resume` and print to PDF using A4 paper with browser headers and footers turned off. Replace the PDF in `public/` with the new copy.
 
-- `src/data/cv.json` holds jobs, education, skills and certificates. Don't edit it by hand: edit `cv.yaml` in CV Tailor, then run `npm run sync:cv`. The sync drops the phone number. Set `CV_PATH` to read a different file.
-- `src/data/site.ts` chooses what the website shows from the CV: one title and a few bullets per job, the skill groups, the status line and the résumé link.
-- `src/content/missions/*.mdx` holds the case studies. The frontmatter fills the homepage rows; the schema is in `src/content.config.ts`.
+## Deployment
 
-Placeholders render with an orange dashed outline (class `todo`) so they're hard to miss.
+The site builds to plain files in `dist/`. For Vercel, the build and routing settings are in `vercel.json`. For Cloudflare Pages, use `npm run build` as the build command and `dist` as the output directory.
 
-## The ground track
+The old blog URLs redirect to the homepage or the relevant case study.
 
-`scripts/fetch-tle.ts` downloads RCM-1's orbital elements from CelesTrak during each build. If CelesTrak doesn't respond, the build keeps the committed `src/data/tle.json`. In the browser, `src/lib/orbit.ts` propagates the orbit with Kepler's equation plus J2 drift. That's about 1 KB, compared with roughly 40 KB for satellite.js. `npm run check` fails if the propagator drifts more than 150 km from SGP4 within a week; it currently stays under 35 km.
-
-The `Nightly rebuild` workflow calls a deploy hook every night so the elements stay fresh. Add the hook URL as the `DEPLOY_HOOK_URL` repository secret.
-
-## Deploying
-
-The build output is plain files in `dist/`.
-
-| Host | Settings |
-| --- | --- |
-| Cloudflare Pages | Build command `npm run build`, output directory `dist`. `public/_redirects` and `public/_headers` set redirects and cache headers. |
-| Vercel | Import the repository; `vercel.json` sets the same redirects and headers. |
-
-Old `/blog` URLs redirect to the homepage, except the Anki post, which redirects to its case study.
-
-### Résumé
-
-The header and contact links serve `public/Sathira_Williams_Resume.pdf` directly, so readers do not need Google Drive. The print-friendly source is `src/pages/resume.astro`, which uses the site's CV data and editorial experience summaries. After updating the CV or résumé copy, open `/resume`, print to PDF with A4 paper and browser headers/footers disabled, and replace the public PDF. The print stylesheet supplies the page margins.
+There's an optional nightly rebuild workflow to keep the satellite data fresh. It needs a hosting-provider deploy hook saved as the `DEPLOY_HOOK_URL` GitHub secret.
