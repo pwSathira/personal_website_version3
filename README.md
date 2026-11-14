@@ -38,3 +38,7 @@ The build output is plain files in `dist/`.
 | Vercel | Import the repository; `vercel.json` sets the same redirects and headers. |
 
 Old `/blog` URLs redirect to the homepage, except the Anki post, which redirects to its case study.
+
+### Résumé
+
+The header and contact links serve `public/Sathira_Williams_Resume.pdf` directly, so readers do not need Google Drive. The print-friendly source is `src/pages/resume.astro`, which uses the site's CV data and editorial experience summaries. After updating the CV or résumé copy, open `/resume`, print to PDF with A4 paper and browser headers/footers disabled, and replace the public PDF. The print stylesheet supplies the page margins.

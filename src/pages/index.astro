@@ -10,7 +10,11 @@ import Contact from '../components/Contact.astro';
 <Base>
   <Hero />
   <Missions />
-  <PassLog />
+  <div class="experience-band"><PassLog /></div>
   <SpecSheet />
   <Contact />
 </Base>
+
+<style>
+  .experience-band { background: var(--bg-raised); border-block: 1px solid var(--rule); margin-top: clamp(56px, 7vw, 88px); padding-bottom: clamp(48px, 6vw, 72px); }
+</style>

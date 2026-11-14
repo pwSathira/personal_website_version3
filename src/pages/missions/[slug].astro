@@ -1,6 +1,8 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import { projectBriefs } from '../../data/site';
+import { basics } from '../../lib/cv';
 
 export async function getStaticPaths() {
   const missions = (await getCollection('missions')).sort((a, b) => a.data.order - b.data.order);
@@ -12,13 +14,14 @@ export async function getStaticPaths() {
 
 const { entry, next } = Astro.props;
 const { data } = entry;
-const { Content } = await render(entry);
+const { Content, headings } = await render(entry);
+const brief = projectBriefs[entry.id];
 ---
 
 <Base title={data.title} description={data.summary} palette={data.palette}>
   <article class="wrap mission">
     <header class="m-head">
-      <a class="back data" href="/#missions">← All missions</a>
+      <a class="back data" href="/#missions">← All projects</a>
       <p class="label"><span class="accent">{data.code}</span> · {data.dates}</p>
       <h1>{data.title}</h1>
       <p class="summary">{data.summary}</p>
@@ -26,7 +29,7 @@ const { Content } = await render(entry);
         data.links.length > 0 && (
           <div class="actions">
             {data.links.map((l, i) => (
-              <a class:list={['btn', { 'btn-primary': i === 0 }]} href={l.href} rel="noopener">
+              <a class:list={[i === 0 ? 'btn btn-primary' : 'source-link']} href={l.href} rel="noopener">
                 {l.label}
                 {l.note && <span class="muted note">{l.note}</span>}
                 <span class="arrow" aria-hidden="true">↗</span>
@@ -36,6 +39,17 @@ const { Content } = await render(entry);
         )
       }
     </header>
+
+
+
+    <section class="overview" aria-labelledby="overview-title">
+      <div><p class="label">The short version</p><h2 id="overview-title">What I built.<br />What it changed.</h2></div>
+      <div class="overview-copy">
+        <p>{brief.contribution}</p>
+        <p class="outcome">{brief.outcome}</p>
+        <p class="context">{brief.context}</p>
+      </div>
+    </section>
 
     <dl class="facts">
       <div><dt class="label">Role</dt><dd>{data.role}</dd></div>
@@ -50,9 +64,22 @@ const { Content } = await render(entry);
       <div><dt class="label">Stack</dt><dd class="data">{data.stack.join(' · ')}</dd></div>
     </dl>
 
-    <div class="prose">
-      <Content />
+    <div class="reading-layout">
+      <aside class="contents">
+        <nav aria-label="Case study sections">
+          <p class="label">Inside the project</p>
+          <ol>{headings.filter(h => h.depth === 2).map(h => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}</ol>
+        </nav>
+      </aside>
+      <div class="prose"><Content /></div>
     </div>
+
+    <section class="reflection" aria-labelledby="reflection-title">
+      <span class="label">Taking it forward</span>
+      <h2 id="reflection-title">What I learned</h2>
+      <ul>{brief.lessons.map(lesson => <li>{lesson}</li>)}</ul>
+      <a class="btn" href={`mailto:${basics.email}`}>Talk about this project ↗</a>
+    </section>
 
     <a class="next" href={`/missions/${next.id}`}>
       <span class="label">Next · {next.data.code}</span>
@@ -62,6 +89,31 @@ const { Content } = await render(entry);
 </Base>
 
 <style>
+  .overview { display: grid; gap: 24px; padding: clamp(24px, 4vw, 40px); background: var(--bg-raised); border: 1px solid var(--rule); margin-block: 40px 0; }
+  .overview h2 { margin-top: 12px; font-size: clamp(1.7rem, 3vw, 2.5rem); }
+  .overview-copy { display: grid; gap: 16px; }
+  .outcome { font-weight: 600; }
+  .overview .context { font-size: .875rem; color: var(--ink-2); }
+  .reading-layout { display: grid; gap: 32px; min-width: 0; }
+  .reading-layout > * { min-width: 0; }
+  .contents nav { border-top: 1px solid var(--rule-strong); padding-top: 16px; }
+  .contents ol { list-style: none; padding: 0; margin-top: 14px; display: grid; gap: 12px; }
+  .contents a { font-size: .875rem; line-height: 1.4; text-decoration: none; color: var(--ink-2); display: block; }
+  .contents a:hover { color: var(--accent); }
+  .reflection { margin-top: 64px; padding-block: 32px; border-block: 1px solid var(--rule-strong); }
+  .reflection h2 { font-size: 2rem; margin-block: 12px 20px; }
+  .reflection ul { padding-left: 20px; margin-bottom: 24px; color: var(--ink-2); }
+  .reflection li + li { margin-top: 8px; }
+  @media (min-width: 1000px) {
+    .overview { grid-template-columns: minmax(0, .8fr) minmax(0, 1.5fr); gap: 48px; }
+    .reading-layout { grid-template-columns: 220px minmax(0, 1fr); gap: 56px; }
+    .contents nav { position: sticky; top: 88px; }
+    .reflection { margin-left: 276px; }
+  }
+  @media (max-width: 999px) {
+    .contents ol { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 480px) { .contents ol { grid-template-columns: 1fr; } }
   .mission {
     padding-top: clamp(28px, 5vw, 56px);
   }
@@ -96,6 +148,9 @@ const { Content } = await render(entry);
     gap: 10px;
     margin-top: 8px;
   }
+  .source-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 0; font-size: .8125rem; font-family: var(--font-data); }
+  .actions { column-gap: 20px; align-items: center; }
+  @media (max-width: 599px) { .source-link .note { display: none; } }
   .note {
     font-size: 0.6875rem;
   }
@@ -105,8 +160,8 @@ const { Content } = await render(entry);
   }
   .facts {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    margin-block: clamp(40px, 6vw, 72px);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+    margin-block: 32px 48px;
     border-top: 1px solid var(--rule-strong);
   }
   .facts > div {
