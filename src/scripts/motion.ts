@@ -204,8 +204,7 @@ function missions() {
     once(row, () => {
       fadeUp(row, 0, 24);
       animate($('.code', row), { opacity: [0, 1] }, { duration: 0.4, delay: 0.2 });
-      const v = row.querySelector<HTMLElement>('.value:not(.todo)');
-      if (v) countUp(v, 1.4, 0.25);
+
     });
   }
 }
@@ -267,8 +266,7 @@ function missionPage() {
   const facts = page.querySelector<HTMLElement>('.facts');
   if (facts) {
     fadeUp($(':scope > div', facts), 0.35, 10, 0.07);
-    const v = facts.querySelector<HTMLElement>('.value:not(.todo)');
-    if (v) countUp(v, 1.4, 0.5);
+
   }
 }
 

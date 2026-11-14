@@ -1,4 +1,5 @@
 ---
+import { experienceSummaries } from '../data/site';
 import { passes, formatRange, BUILD_TIME, certifications, awards } from '../lib/cv';
 
 const all = passes();
@@ -25,9 +26,10 @@ const other = all.filter((p) => p.lane === 'other');
   <div class="section-head">
     <span class="label">02 · Pass log</span>
     <h2 id="pass-log-title">Experience</h2>
-    <p>Every role and degree since 2020 on one timeline, with the software work in detail below.</p>
+    <p>Production development, a Canadian Space Agency capstone, and a foundation in software engineering.</p>
   </div>
 
+  <details class="career-timeline"><summary class="data">View career timeline <span aria-hidden="true">+</span></summary>
   <div class="timeline" aria-hidden="true">
     <div class="axis data">
       {years.map((y) => <span style={`left:${pct(Date.UTC(y, 0, 1))}%`}>{y}</span>)}
@@ -58,10 +60,14 @@ const other = all.filter((p) => p.lane === 'other');
     <span class="now data" style={`--p:${pct(now)}`}><span>Now</span></span>
   </div>
 
+  </details>
+
   <div class="detail">
     <ol class="jobs">
       {
-        software.map((p) => (
+        software.map((p) => {
+          const bullets = experienceSummaries[p.org] ?? p.bullets;
+          return (
           <li>
             <div class="when data">
               <span>{formatRange(p.dates)}</span>
@@ -70,18 +76,19 @@ const other = all.filter((p) => p.lane === 'other');
             <div>
               <h3>{p.title}</h3>
               <p class="org">{p.org}</p>
+              {bullets[0] && <p class="highlight">{bullets[0]}</p>}
               <ul>
-                {p.bullets.map((b) => (
+                {bullets.slice(1).map((b) => (
                   <li>{b}</li>
                 ))}
               </ul>
             </div>
           </li>
-        ))
+        ); })
       }
     </ol>
 
-    <aside class="aside">
+    <aside class="aside" id="education">
       <h3 class="label">Education</h3>
       <ul class="edu">
         {
@@ -96,7 +103,7 @@ const other = all.filter((p) => p.lane === 'other');
         }
       </ul>
 
-      <h3 class="label">Also</h3>
+      <details class="other-experience"><summary class="label">Other experience</summary>
       <ul class="also">
         {
           other.map((p) => (
@@ -110,6 +117,7 @@ const other = all.filter((p) => p.lane === 'other');
         }
       </ul>
 
+      </details>
       <h3 class="label">Certificates and awards</h3>
       <p class="small muted">{[...certifications.filter((c) => !/candidate/i.test(c)), ...awards].join(' · ')}</p>
     </aside>
@@ -117,11 +125,17 @@ const other = all.filter((p) => p.lane === 'other');
 </section>
 
 <style>
+  .career-timeline { margin-bottom: 32px; border-bottom: 1px solid var(--rule); }
+  .career-timeline > summary { padding: 12px 0; cursor: pointer; color: var(--ink-2); }
+  .career-timeline > summary span { float: right; color: var(--accent); }
+  .other-experience { margin-top: 28px; }
+  .other-experience summary { cursor: pointer; padding-block: 12px; }
+  .highlight { margin-top: 16px; padding-left: 16px; border-left: 2px solid var(--accent); color: var(--ink); }
   .timeline {
     --name: 0px;
     position: relative;
     padding: 28px 0 8px;
-    margin-bottom: clamp(40px, 6vw, 72px);
+    margin-bottom: 24px;
     border-bottom: 1px solid var(--rule);
   }
   .axis {

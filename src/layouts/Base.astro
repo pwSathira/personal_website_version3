@@ -19,9 +19,9 @@ const desc =
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const isHome = Astro.url.pathname === '/';
 const nav = [
-  { href: '/#missions', label: 'Missions' },
-  { href: '/#pass-log', label: 'Pass log' },
-  { href: '/#spec', label: 'Spec' },
+  { href: '/#missions', label: 'Projects' },
+  { href: '/#pass-log', label: 'Experience' },
+  { href: '/#spec', label: 'Skills' },
   { href: '/#contact', label: 'Contact' },
 ];
 const person = {
@@ -82,7 +82,7 @@ const built = BUILD_TIME.toISOString().slice(0, 10);
           <Logo size={24} solid />
           <span>Sathira Williams</span>
         </a>
-        <nav aria-label="Sections">
+        <nav aria-label="Sections" id="section-navigation">
           <ul>
             {nav.map((n) => <li><a href={n.href}>{n.label}</a></li>)}
           </ul>
@@ -183,7 +183,7 @@ const built = BUILD_TIME.toISOString().slice(0, 10);
     margin-left: auto;
   }
   nav ul {
-    display: none;
+    display: flex;
     list-style: none;
     padding: 0;
     gap: 4px;
@@ -237,6 +237,13 @@ const built = BUILD_TIME.toISOString().slice(0, 10);
   .top-cta:hover {
     border-color: var(--accent);
     color: var(--accent);
+  }
+  @media (max-width: 759px) {
+    .top-inner { flex-wrap: wrap; height: auto; min-height: 56px; gap: 12px; padding-top: 10px; }
+    nav { order: 4; width: 100%; margin-left: 0; border-top: 1px solid var(--rule); }
+    nav ul { justify-content: space-between; }
+    nav a { padding: 12px 0; min-height: 44px; font-size: .75rem; }
+    .mark { font-size: .9375rem; }
   }
   @media (min-width: 760px) {
     nav ul {

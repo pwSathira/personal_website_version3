@@ -5,7 +5,6 @@ import Icon from './Icon.astro';
 const links = [
   { label: 'GitHub', href: basics.links.github, handle: 'pwSathira', icon: { slug: 'github' } },
   { label: 'LinkedIn', href: basics.links.linkedin, handle: 'in/pwSathira', icon: { mono: 'in' } },
-  { label: 'X', href: basics.links.x, handle: '@polywertz', icon: { slug: 'x' } },
   { label: 'Résumé', href: basics.resumeUrl, handle: 'PDF', icon: null },
 ];
 ---
@@ -13,23 +12,23 @@ const links = [
 <section id="contact" class="section wrap" aria-labelledby="contact-title">
   <div class="section-head">
     <span class="label">04 · Contact</span>
-    <h2 id="contact-title">Book a pass</h2>
-    <p>Email is the quickest way to reach me.</p>
+    <h2 id="contact-title">Let’s talk</h2>
+    <p>Hiring for a full-stack role? I’m open to opportunities in Vancouver and remote teams.</p>
   </div>
 
   <!-- Same panel language as the ground-track figure: a mono header row,
        one primary channel, then a row of secondary links as readout cells. -->
   <div class="channel">
     <div class="channel-head data">
-      <span><span class="label">Channel</span> Email</span>
+      <span class="availability"><span class="status-dot" aria-hidden="true"></span> Open to full-stack roles</span>
       <span class="muted">{basics.station.name} · PT</span>
     </div>
 
     <div class="primary">
       <a class="address" href={`mailto:${basics.email}`}>{basics.email}</a>
       <div class="actions">
-        <button class="btn" type="button" data-copy={basics.email}>Copy address</button>
-        <a class="btn btn-primary" href={`mailto:${basics.email}`}>Write <span class="arrow" aria-hidden="true">↗</span></a>
+        <button class="btn" type="button" data-copy={basics.email} aria-live="polite">Copy address</button>
+        <a class="btn btn-primary" href={`mailto:${basics.email}`}>Email me <span class="arrow" aria-hidden="true">↗</span></a>
       </div>
     </div>
 
@@ -61,6 +60,8 @@ const links = [
 </section>
 
 <style>
+  .availability { display: inline-flex; align-items: center; gap: 10px; }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); }
   .channel {
     border: 1px solid var(--rule-strong);
   }
@@ -165,7 +166,7 @@ const links = [
   }
   @media (min-width: 960px) {
     .links {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
 </style>
@@ -178,7 +179,7 @@ const links = [
         await navigator.clipboard.writeText(b.dataset.copy!);
         b.textContent = 'Copied';
       } catch {
-        b.textContent = 'Press Ctrl+C';
+        b.textContent = 'Select email to copy';
       }
       setTimeout(() => (b.textContent = idle), 2000);
     });

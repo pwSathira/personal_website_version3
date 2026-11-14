@@ -1,5 +1,10 @@
 ---
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import schedule from '../assets/missions/star-sync-schedule.png';
+import login from '../assets/missions/blue-link-login.png';
+import GroundTrack from './GroundTrack.astro';
+import { projectBriefs } from '../data/site';
 
 const missions = (await getCollection('missions')).sort((a, b) => a.data.order - b.data.order);
 ---
@@ -8,16 +13,28 @@ const missions = (await getCollection('missions')).sort((a, b) => a.data.order -
   <div class="section-head">
     <span class="label">01 · Missions</span>
     <h2 id="missions-title">Selected work</h2>
-    <p>Three projects, each with a write-up: the problem, the decisions, what I measured and what I'd change.</p>
+    <p>Working software, personal ownership, and the decisions behind each build.</p>
   </div>
 
   <ol class="list">
     {
       missions.map(({ id, data }) => {
+        const brief = projectBriefs[id];
+        const source = data.links.find(l => /repository|ss-core/i.test(l.label));
         const demo = data.links.find((l) => /demo|ankiweb/i.test(l.label));
         return (
-          <li class="row">
-            <span class="code data">{data.code}</span>
+          <li class:list={['row', { featured: id === 'star-sync' }]} data-palette={data.palette}>
+            <a class:list={['preview', id]} href={`/missions/${id}`} tabindex="-1" aria-hidden="true">
+              {id === 'star-sync' ? <Image src={schedule} alt="" widths={[640, 1200]} sizes="(min-width: 1280px) 695px, (min-width: 960px) 58vw, 100vw" /> : id === 'blue-link' ? <Image src={login} alt="" widths={[480, 800]} sizes="(min-width: 960px) 40vw, 100vw" /> : (
+                <div class="audio-preview">
+                  <span class="data">.apkg → audio files</span>
+                  <div class="wave" aria-hidden="true">{[16,32,22,48,66,38,80,54,30,68,90,52,36,60,28,44,18].map(h => <i style={`height:${h}px`} />)}</div>
+                  <span class="audio-files data">a.mp3 &nbsp; ka.mp3 &nbsp; sa.ogg</span>
+                </div>
+              )}
+              <span class="preview-label label">{id === 'star-sync' ? 'Featured project · Satellite scheduling' : id === 'blue-link' ? 'Blue-Link · Interface design mockup' : 'Anki add-on + desktop app'}</span>
+            </a>
+            <span class="code label">{brief.category}</span>
             <div class="main">
               <h3>
                 <a class="stretch" href={`/missions/${id}`}>
@@ -25,11 +42,13 @@ const missions = (await getCollection('missions')).sort((a, b) => a.data.order -
                 </a>
               </h3>
               <p class="summary">{data.summary}</p>
-              <p class="stack data">{data.stack.slice(0, 6).join(' · ')}</p>
+              <p class="ownership"><span class="label">My role</span> {data.role}</p>
+              <p class="stack data">{data.stack.filter(s => !['skyfield', 'Qt (Anki add-on API)', 'FlatLaf', 'MigLayout'].includes(s)).slice(0, 4).join(' · ')}</p>
             </div>
             <div class="readout">
               <span class:list={['value', { todo: data.readout.todo }]}>{data.readout.value}</span>
               <span class="data muted">{data.readout.label}</span>
+              {id === 'star-sync' && <span class="metric-context">6 satellites · 3 stations · 150 requests</span>}
             </div>
             <div class="meta data">
               <span class="muted">{data.dates}</span>
@@ -38,136 +57,69 @@ const missions = (await getCollection('missions')).sort((a, b) => a.data.order -
                   {demo.label} ↗
                 </a>
               )}
-              <span class="go" aria-hidden="true">Read →</span>
+              {source && <a class="ext" href={source.href} rel="noopener">Source ↗</a>}
+              <a class="go" href={`/missions/${id}`} aria-label={`Read the ${data.title} case study`}>Case study →</a>
             </div>
           </li>
         );
       })
     }
   </ol>
+  <details class="live-work">
+    <summary><span><span class="label">Live engineering demo</span><strong>A satellite over Vancouver. Computed in your browser.</strong></span><span class="disclosure" aria-hidden="true">+</span></summary>
+    <div class="live-content">
+    <div class="live-intro">
+      <div><span class="label">In orbit · A working example</span><h3>The engineering behind the interface.</h3></div>
+      <p>This live satellite track uses the same orbital library as the Star-Sync demo. <a href="/missions/star-sync">Explore the scheduler →</a></p>
+    </div>
+    <GroundTrack />
+    </div>
+  </details>
 </section>
 
 <style>
-  .list {
-    list-style: none;
-    padding: 0;
-    border-top: 1px solid var(--rule);
-  }
-  .row {
-    position: relative;
-    display: grid;
-    grid-template-columns: 64px minmax(0, 1fr);
-    gap: 14px 20px;
-    padding: 26px 0;
-    border-bottom: 1px solid var(--rule);
-  }
-  /* Accent rule that draws in on hover. */
-  .row::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: -1px;
-    height: 1px;
-    width: 100%;
-    background: var(--accent);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.45s var(--ease);
-  }
-  .row:hover::before,
-  .row:focus-within::before {
-    transform: scaleX(1);
-  }
-  .code {
-    color: var(--ink-3);
-    padding-top: 0.55em;
-  }
-  .row:hover .code {
-    color: var(--accent);
-  }
-  h3 {
-    font-size: clamp(1.6rem, 3.4vw, 2.4rem);
-    letter-spacing: -0.03em;
-  }
-  .stretch {
-    text-decoration: none;
-  }
-  .stretch::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-  }
-  .row:hover h3 a {
-    color: var(--ink);
-  }
-  .summary {
-    margin-top: 8px;
-    color: var(--ink-2);
-    max-width: 58ch;
-  }
-  .stack {
-    margin-top: 12px;
-    color: var(--ink-3);
-  }
-  .readout,
-  .meta {
-    grid-column: 2;
-  }
-  .readout {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .value {
-    font-family: var(--font-data);
-    font-size: 1.375rem;
-    letter-spacing: -0.02em;
-    font-variant-numeric: tabular-nums;
-  }
-  .meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px 18px;
-  }
-  .ext {
-    position: relative;
-    z-index: 1;
-  }
-  .go {
-    margin-left: auto;
-    color: var(--ink-3);
-    transition:
-      transform 0.3s var(--ease),
-      color 0.3s;
-  }
-  .row:hover .go {
-    color: var(--accent);
-    transform: translateX(4px);
-  }
+  .live-work { margin-top: 40px; border: 1px solid var(--rule-strong); background: var(--bg-raised); }
+  .live-work summary { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 24px; cursor: pointer; list-style: none; }
+  .live-work summary::-webkit-details-marker { display: none; }
+  .live-work summary > span:first-child { display: grid; gap: 8px; }
+  .live-work summary strong { font-size: 1.125rem; font-weight: 500; line-height: 1.4; }
+  .disclosure { font-size: 1.75rem; color: var(--accent); transition: transform .25s; }
+  .live-work[open] .disclosure { transform: rotate(45deg); }
+  .live-content { padding: 0 24px 24px; }
+  .metric-context { color: var(--ink-3); font-size: .75rem; }
+
+  .live-intro { display: flex; flex-wrap: wrap; gap: 20px 48px; justify-content: space-between; margin-bottom: 24px; }
+  .live-intro h3 { margin-top: 10px; font-size: 1.6rem; }
+  .live-intro p { max-width: 46ch; color: var(--ink-2); }
+  .list { list-style: none; padding: 0; display: grid; gap: 40px; }
+  .row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; padding: clamp(16px, 2.4vw, 28px); background: var(--bg); color: var(--ink); border: 1px solid var(--rule-strong); min-width: 0; grid-template-rows: auto auto 1fr auto auto; }
+  .preview { display: flex; flex-direction: column; text-decoration: none; background: var(--bg-raised); border: 1px solid var(--rule); overflow: hidden; }
+  .preview img { width: 100%; height: 260px; object-fit: contain; padding: 24px; transition: transform 0.45s var(--ease); }
+  .audio-preview { transition: transform 0.45s var(--ease); }
+  .row:hover .preview img,
+  .row:hover .audio-preview,
+  .row:focus-within .preview img,
+  .row:focus-within .audio-preview { transform: scale(1.025); }
+  .preview-label { padding: 12px 16px; border-top: 1px solid var(--rule); }
+  .audio-preview { height: 260px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 24px; color: var(--ink-2); }
+  .wave { height: 90px; display: flex; align-items: center; gap: clamp(4px, 1vw, 10px); }
+  .wave i { width: 6px; border-radius: 4px; background: var(--accent); }
+  .code { color: var(--ink-3); }
+  h3 { font-size: clamp(1.7rem, 3.4vw, 2.6rem); letter-spacing: -0.035em; }
+  h3 a { text-decoration: none; }
+  .summary { margin-top: 12px; color: var(--ink-2); max-width: 58ch; }
+  .ownership { margin-top: 16px; color: var(--ink-2); font-size: .875rem; }
+  .ownership .label { display: block; margin-bottom: 4px; }
+  .stack { margin-top: 6px; color: var(--ink-3); }
+  .readout { display: flex; flex-direction: column; gap: 4px; }
+  .value { font-size: 2rem; color: var(--accent); letter-spacing: -0.04em; }
+  .meta { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+  .go { margin-left: auto; color: var(--ink); }
   @media (min-width: 960px) {
-    .row {
-      grid-template-columns: 88px minmax(0, 1fr) 220px 150px;
-      gap: 32px;
-      padding: 34px 0;
-    }
-    .readout,
-    .meta {
-      grid-column: auto;
-    }
-    .readout {
-      padding-top: 0.5em;
-    }
-    .meta {
-      flex-direction: column;
-      align-items: flex-end;
-      text-align: right;
-      padding-top: 0.6em;
-    }
-    .go {
-      margin-left: 0;
-      margin-top: auto;
-    }
+    .list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 32px; }
+    .featured { grid-column: 1 / -1; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 16px 36px; grid-template-rows: auto 1fr auto auto; }
+    .featured .preview { grid-column: 1; grid-row: 1 / 5; }
+    .featured .preview img { height: 100%; min-height: 300px; padding: 28px; }
+    .featured .code, .featured .main, .featured .readout, .featured .meta { grid-column: 2; }
   }
 </style>
