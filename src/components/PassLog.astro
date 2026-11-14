@@ -1,0 +1,290 @@
+---
+import { passes, formatRange, BUILD_TIME, certifications, awards } from '../lib/cv';
+
+const all = passes();
+const lanes = [
+  { id: 'software', name: 'Software' },
+  { id: 'study', name: 'Study' },
+  { id: 'other', name: 'Other work' },
+] as const;
+
+// Axis: from the first start to six months past today.
+const t0 = Math.min(...all.map((p) => p.start.getTime()));
+const t1 = Date.UTC(BUILD_TIME.getUTCFullYear(), BUILD_TIME.getUTCMonth() + 6, 1);
+const pct = (t: number) => ((t - t0) / (t1 - t0)) * 100;
+const now = BUILD_TIME.getTime();
+const years: number[] = [];
+for (let y = new Date(t0).getUTCFullYear() + 1; Date.UTC(y, 0, 1) < t1; y++) years.push(y);
+
+const software = all.filter((p) => p.lane === 'software');
+const study = all.filter((p) => p.lane === 'study');
+const other = all.filter((p) => p.lane === 'other');
+---
+
+<section id="pass-log" class="section wrap" aria-labelledby="pass-log-title">
+  <div class="section-head">
+    <span class="label">02 · Pass log</span>
+    <h2 id="pass-log-title">Experience</h2>
+    <p>Every role and degree since 2020 on one timeline, with the software work in detail below.</p>
+  </div>
+
+  <div class="timeline" aria-hidden="true">
+    <div class="axis data">
+      {years.map((y) => <span style={`left:${pct(Date.UTC(y, 0, 1))}%`}>{y}</span>)}
+    </div>
+    {
+      lanes.map((lane) => (
+        <div class="lane" data-lane={lane.id}>
+          <span class="lane-name label">{lane.name}</span>
+          <div class="track">
+            {all
+              .filter((p) => p.lane === lane.id)
+              .map((p) => {
+                const left = pct(p.start.getTime());
+                const right = pct((p.end ?? BUILD_TIME).getTime());
+                return (
+                  <span
+                    class:list={['bar', { open: !p.end }]}
+                    style={`left:${left}%;width:${Math.max(0.6, right - left)}%`}
+                  >
+                    <span class="bar-label data">{p.label}</span>
+                  </span>
+                );
+              })}
+          </div>
+        </div>
+      ))
+    }
+    <span class="now data" style={`--p:${pct(now)}`}><span>Now</span></span>
+  </div>
+
+  <div class="detail">
+    <ol class="jobs">
+      {
+        software.map((p) => (
+          <li>
+            <div class="when data">
+              <span>{formatRange(p.dates)}</span>
+              {p.location && <span class="muted">{p.location}</span>}
+            </div>
+            <div>
+              <h3>{p.title}</h3>
+              <p class="org">{p.org}</p>
+              <ul>
+                {p.bullets.map((b) => (
+                  <li>{b}</li>
+                ))}
+              </ul>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+
+    <aside class="aside">
+      <h3 class="label">Education</h3>
+      <ul class="edu">
+        {
+          study.map((p) => (
+            <li>
+              <strong>{p.title}</strong>
+              <span>{p.org}</span>
+              <span class="data muted">{formatRange(p.dates)}</span>
+              {p.details && <span class="small muted">{p.details.split('Coursework:')[0].trim()}</span>}
+            </li>
+          ))
+        }
+      </ul>
+
+      <h3 class="label">Also</h3>
+      <ul class="also">
+        {
+          other.map((p) => (
+            <li>
+              <span>
+                {p.title}, {p.org}
+              </span>
+              <span class="data muted">{formatRange(p.dates)}</span>
+            </li>
+          ))
+        }
+      </ul>
+
+      <h3 class="label">Certificates and awards</h3>
+      <p class="small muted">{[...certifications.filter((c) => !/candidate/i.test(c)), ...awards].join(' · ')}</p>
+    </aside>
+  </div>
+</section>
+
+<style>
+  .timeline {
+    --name: 0px;
+    position: relative;
+    padding: 28px 0 8px;
+    margin-bottom: clamp(40px, 6vw, 72px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .axis {
+    position: absolute;
+    inset: 0 0 0 var(--name);
+    color: var(--ink-3);
+    pointer-events: none;
+  }
+  .axis span {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    padding-left: 6px;
+    border-left: 1px solid var(--rule);
+    font-size: 0.6875rem;
+  }
+  .lane {
+    position: relative;
+    display: grid;
+    padding-block: 22px 6px;
+  }
+  .lane-name {
+    position: absolute;
+    left: 0;
+    top: 20px;
+    display: none;
+  }
+  .track {
+    position: relative;
+    height: 10px;
+    margin-left: var(--name);
+  }
+  .bar {
+    position: absolute;
+    top: 0;
+    height: 10px;
+    background: var(--ink);
+  }
+  [data-lane='study'] .bar {
+    background: var(--ink-2);
+  }
+  [data-lane='other'] .bar {
+    height: 4px;
+    top: 3px;
+    background: var(--ink-3);
+  }
+  .bar.open {
+    background-image: linear-gradient(90deg, transparent 70%, var(--bg) 70%);
+    background-size: 6px 100%;
+    background-repeat: repeat-x;
+    background-position: right;
+  }
+  .bar-label {
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 0;
+    white-space: nowrap;
+    font-size: 0.6875rem;
+    color: var(--ink-2);
+    display: none;
+  }
+  .now {
+    position: absolute;
+    left: calc(var(--name) + (100% - var(--name)) * var(--p) / 100);
+    top: 0;
+    bottom: 0;
+    border-left: 1px solid var(--accent);
+    color: var(--accent);
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .now span {
+    position: absolute;
+    top: -2px;
+    right: 6px;
+  }
+  @media (min-width: 720px) {
+    .bar-label {
+      display: block;
+    }
+  }
+  @media (min-width: 1100px) {
+    .timeline {
+      --name: 110px;
+    }
+    .lane-name {
+      display: block;
+    }
+  }
+
+  .detail {
+    display: grid;
+    gap: 48px;
+  }
+  .jobs {
+    list-style: none;
+    padding: 0;
+  }
+  .jobs > li {
+    display: grid;
+    gap: 8px 32px;
+    padding-block: 24px;
+    border-top: 1px solid var(--rule);
+  }
+  .jobs > li:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+  .when {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .jobs h3 {
+    font-size: 1.375rem;
+  }
+  .org {
+    color: var(--ink-2);
+    margin-top: 4px;
+  }
+  .jobs ul {
+    margin-top: 12px;
+    padding-left: 1.1em;
+    color: var(--ink-2);
+  }
+  .jobs ul li + li {
+    margin-top: 6px;
+  }
+  .jobs ul li::marker {
+    color: var(--ink-3);
+  }
+  .aside h3 {
+    margin-bottom: 12px;
+  }
+  .aside h3:not(:first-child) {
+    margin-top: 36px;
+  }
+  .aside ul {
+    list-style: none;
+    padding: 0;
+  }
+  .edu li,
+  .also li {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-block: 10px;
+    border-top: 1px solid var(--rule);
+  }
+  .small {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+  @media (min-width: 760px) {
+    .jobs > li {
+      grid-template-columns: 170px minmax(0, 1fr);
+    }
+  }
+  @media (min-width: 1100px) {
+    .detail {
+      grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
+      gap: 72px;
+    }
+  }
+</style>

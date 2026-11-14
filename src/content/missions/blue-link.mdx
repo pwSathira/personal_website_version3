@@ -1,0 +1,69 @@
+---
+code: MSN-03
+order: 3
+title: Blue-Link
+summary: A mobile data terminal for police officers. A Java desktop client for profiles, charges and indictments, backed by a cloud database on Azure.
+dates: Jun 2023 – Jan 2024
+role: Sole developer and designer
+team: Solo
+stack: [Java, Swing, FlatLaf, MigLayout, Spring Boot, Spring Data JPA, Azure SQL, Gradle]
+readout: { value: '8 months', label: 'solo, from Illustrator mockups to Azure SQL' }
+links:
+  - { label: Repository, href: 'https://github.com/pwSathira/blue-link' }
+  - { label: NyxOps, href: 'https://github.com/NyxOps', note: 'successor' }
+palette: bluelink
+---
+
+import Flow from '../../components/Flow.astro';
+import Shot from '../../components/Shot.astro';
+import CredsDiagram from '../../components/CredsDiagram.astro';
+import login from '../../assets/missions/blue-link-login.png';
+
+A mobile data terminal is the computer in a patrol car: officers sign in, look people up, and file charges from the road. Blue-Link is my version, which I wrote alone between June 2023 and January 2024.
+
+## Every screen reads and writes through JPA repositories
+
+<Flow
+  caption="One Gradle project. The Swing client and the Spring context run in the same process."
+  steps={[
+    { k: 'ui', title: 'Swing screens', body: 'Login, search, profiles, charges, reports and settings, switched by a card controller.' },
+    { k: 'service', title: 'Services', body: 'UserService, ProfilesService, ChargesService and IndictmentService hold the rules.' },
+    { k: 'jpa', title: 'Spring Data JPA', body: 'One repository per entity: users, profiles, charges, indictments.' },
+    { k: 'azure', title: 'Azure SQL', body: 'Accounts and records live in the cloud, so any terminal can sign in.' },
+  ]}
+/>
+
+## I drew the screens before writing Swing
+
+I mocked up the login and report screens in Illustrator first, then built the components the mockups needed: rounded panels and text fields, and icons recoloured at runtime to match the theme. FlatLaf handles the base look; MigLayout handles the grids.
+
+<Shot
+  src={login}
+  alt="Illustrator mockup of Blue-Link's login screen: the Blue-Link logo in teal, rounded username and password fields, a Remember Me check and a round arrow button on the left; a teal panel with layered curves on the right."
+  label="Blue-Link · login mockup, Illustrator"
+  caption="The login mockup. The Swing build reused its arrow and background artwork and rebuilt the rounded fields as components."
+/>
+
+## The client connects straight to the database
+
+Each terminal opens its own JDBC connection to Azure SQL, so each terminal holds database credentials: acceptable for a student project, wrong for a police force. Its successor puts an API and a sign-in service between the two.
+
+<CredsDiagram caption="Where the database password lives, in Blue-Link and in NyxOps." />
+
+## NyxOps is Blue-Link's successor
+
+[NyxOps](https://github.com/NyxOps) is an open-source records management system for police that I run as its own organization. It starts from what Blue-Link got wrong: a web client instead of a desktop install, sign-in and permissions handled by Keycloak instead of the client, and the database reachable only through the API. It's in early development.
+
+<table>
+  <thead>
+    <tr><th></th><th>Blue-Link</th><th>NyxOps</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Client</td><td>Java Swing desktop app</td><td>Next.js web app</td></tr>
+    <tr><td>Backend</td><td>Spring, inside the client process</td><td>FastAPI service, Celery workers</td></tr>
+    <tr><td>Database</td><td>Azure SQL, reached directly</td><td>PostgreSQL, behind the API</td></tr>
+    <tr><td>Sign-in</td><td>Accounts table in the database</td><td>Keycloak, OpenID Connect, roles</td></tr>
+    <tr><td>Records</td><td>Profiles, charges, indictments</td><td>Incidents, people, arrests, evidence, warrants</td></tr>
+    <tr><td>Hosting</td><td>One shared cloud database</td><td>Self-hosted with Docker or Kubernetes</td></tr>
+  </tbody>
+</table>

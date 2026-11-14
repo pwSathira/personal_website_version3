@@ -1,0 +1,96 @@
+---
+// One square per item, coloured by group, in reading order. Used to show
+// a whole population at once (e.g. 150 requests) where a percentage hides the count.
+interface Group {
+  n: number;
+  label: string;
+  tone: 'ok' | 'bad' | 'off';
+}
+interface Props {
+  groups: Group[];
+  cols?: number;
+  title?: string;
+  caption?: string;
+}
+const { groups, cols = 25, title, caption } = Astro.props;
+const total = groups.reduce((s, g) => s + g.n, 0);
+const cells = groups.flatMap((g) => Array.from({ length: g.n }, () => g.tone));
+const rows = Math.ceil(total / cols);
+const S = 10; // cell pitch in viewBox units
+const G = 2; // gap
+const summary = groups.map((g) => `${g.n} ${g.label}`).join('; ');
+---
+
+<figure class="waffle">
+  {title && <p class="title label">{title}</p>}
+  <svg
+    viewBox={`0 0 ${cols * S - G} ${rows * S - G}`}
+    role="img"
+    aria-label={`${total} items: ${summary}.`}
+    preserveAspectRatio="xMinYMin meet"
+  >
+    {cells.map((t, i) => <rect class={t} x={(i % cols) * S} y={Math.floor(i / cols) * S} width={S - G} height={S - G} />)}
+  </svg>
+  <ul class="key" aria-hidden="true">
+    {
+      groups.map((g) => (
+        <li>
+          <i class:list={['sw', g.tone]} />
+          <span class="n data">{g.n}</span>
+          <span>{g.label}</span>
+        </li>
+      ))
+    }
+  </ul>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .title {
+    margin-bottom: 12px;
+  }
+  svg {
+    width: 100%;
+    height: auto;
+  }
+  rect.ok,
+  .sw.ok {
+    fill: var(--ok);
+    background: var(--ok);
+  }
+  rect.bad,
+  .sw.bad {
+    fill: var(--accent);
+    background: var(--accent);
+  }
+  rect.off,
+  .sw.off {
+    fill: var(--rule-strong);
+    background: var(--rule-strong);
+  }
+  .key {
+    list-style: none;
+    padding: 0;
+    margin-top: 14px;
+    display: grid;
+    gap: 6px;
+    font-size: 0.9375rem;
+    line-height: 1.4;
+  }
+  .key li {
+    display: grid;
+    grid-template-columns: 12px 2.5em minmax(0, 1fr);
+    align-items: baseline;
+    gap: 10px;
+    margin: 0;
+  }
+  .sw {
+    width: 12px;
+    height: 12px;
+    align-self: center;
+  }
+  .n {
+    font-size: 0.875rem;
+    text-align: right;
+  }
+</style>

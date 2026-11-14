@@ -1,0 +1,173 @@
+---
+import { getCollection } from 'astro:content';
+
+const missions = (await getCollection('missions')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<section id="missions" class="section wrap" aria-labelledby="missions-title">
+  <div class="section-head">
+    <span class="label">01 · Missions</span>
+    <h2 id="missions-title">Selected work</h2>
+    <p>Three projects, each with a write-up: the problem, the decisions, what I measured and what I'd change.</p>
+  </div>
+
+  <ol class="list">
+    {
+      missions.map(({ id, data }) => {
+        const demo = data.links.find((l) => /demo|ankiweb/i.test(l.label));
+        return (
+          <li class="row">
+            <span class="code data">{data.code}</span>
+            <div class="main">
+              <h3>
+                <a class="stretch" href={`/missions/${id}`}>
+                  {data.title}
+                </a>
+              </h3>
+              <p class="summary">{data.summary}</p>
+              <p class="stack data">{data.stack.slice(0, 6).join(' · ')}</p>
+            </div>
+            <div class="readout">
+              <span class:list={['value', { todo: data.readout.todo }]}>{data.readout.value}</span>
+              <span class="data muted">{data.readout.label}</span>
+            </div>
+            <div class="meta data">
+              <span class="muted">{data.dates}</span>
+              {demo && (
+                <a class="ext" href={demo.href} rel="noopener">
+                  {demo.label} ↗
+                </a>
+              )}
+              <span class="go" aria-hidden="true">Read →</span>
+            </div>
+          </li>
+        );
+      })
+    }
+  </ol>
+</section>
+
+<style>
+  .list {
+    list-style: none;
+    padding: 0;
+    border-top: 1px solid var(--rule);
+  }
+  .row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 14px 20px;
+    padding: 26px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  /* Accent rule that draws in on hover. */
+  .row::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: -1px;
+    height: 1px;
+    width: 100%;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.45s var(--ease);
+  }
+  .row:hover::before,
+  .row:focus-within::before {
+    transform: scaleX(1);
+  }
+  .code {
+    color: var(--ink-3);
+    padding-top: 0.55em;
+  }
+  .row:hover .code {
+    color: var(--accent);
+  }
+  h3 {
+    font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+    letter-spacing: -0.03em;
+  }
+  .stretch {
+    text-decoration: none;
+  }
+  .stretch::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  .row:hover h3 a {
+    color: var(--ink);
+  }
+  .summary {
+    margin-top: 8px;
+    color: var(--ink-2);
+    max-width: 58ch;
+  }
+  .stack {
+    margin-top: 12px;
+    color: var(--ink-3);
+  }
+  .readout,
+  .meta {
+    grid-column: 2;
+  }
+  .readout {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .value {
+    font-family: var(--font-data);
+    font-size: 1.375rem;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 18px;
+  }
+  .ext {
+    position: relative;
+    z-index: 1;
+  }
+  .go {
+    margin-left: auto;
+    color: var(--ink-3);
+    transition:
+      transform 0.3s var(--ease),
+      color 0.3s;
+  }
+  .row:hover .go {
+    color: var(--accent);
+    transform: translateX(4px);
+  }
+  @media (min-width: 960px) {
+    .row {
+      grid-template-columns: 88px minmax(0, 1fr) 220px 150px;
+      gap: 32px;
+      padding: 34px 0;
+    }
+    .readout,
+    .meta {
+      grid-column: auto;
+    }
+    .readout {
+      padding-top: 0.5em;
+    }
+    .meta {
+      flex-direction: column;
+      align-items: flex-end;
+      text-align: right;
+      padding-top: 0.6em;
+    }
+    .go {
+      margin-left: 0;
+      margin-top: auto;
+    }
+  }
+</style>

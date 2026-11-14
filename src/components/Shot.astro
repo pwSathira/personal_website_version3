@@ -1,0 +1,54 @@
+---
+// A real screenshot in a thin frame, with a mono label bar naming where it came from.
+import { Picture } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  label: string;
+  caption?: string;
+  wide?: boolean;
+}
+const { src, alt, label, caption, wide = true } = Astro.props;
+---
+
+<figure class:list={['shot', { wide }]}>
+  <div class="frame">
+    <p class="bar label"><span class="dot" aria-hidden="true"></span>{label}</p>
+    <Picture
+      src={src}
+      alt={alt}
+      formats={['avif', 'webp']}
+      widths={[640, 1024, 1600, 2200].filter((w) => w <= src.width)}
+      sizes="(min-width: 1280px) 1184px, calc(100vw - 2 * var(--gutter))"
+      loading="lazy"
+      decoding="async"
+    />
+  </div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .frame {
+    border: 1px solid var(--rule-strong);
+    background: var(--bg-raised);
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--rule-strong);
+  }
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .frame :global(img) {
+    width: 100%;
+    height: auto;
+  }
+</style>

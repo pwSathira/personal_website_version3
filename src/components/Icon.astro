@@ -1,0 +1,47 @@
+---
+// A single-colour technology or service mark from Simple Icons (CC0),
+// drawn in currentColor. Marks Simple Icons doesn't carry (Azure, LinkedIn)
+// and practices with no logo fall back to a small mono monogram tile.
+import * as si from 'simple-icons';
+
+interface Props {
+  /** Simple Icons slug, e.g. "react", "nextdotjs". */
+  slug?: string;
+  /** Two-letter fallback when there is no slug. */
+  mono?: string;
+  label?: string;
+  size?: number;
+}
+const { slug, mono, label, size = 18 } = Astro.props;
+const key = slug ? `si${slug[0].toUpperCase()}${slug.slice(1)}` : '';
+const icon = key ? ((si as Record<string, { path: string; title: string } | undefined>)[key] ?? null) : null;
+if (slug && !icon) throw new Error(`Icon: no Simple Icons mark for "${slug}"`);
+---
+
+{
+  icon ? (
+    <svg class="icon" width={size} height={size} viewBox="0 0 24 24" role={label ? 'img' : undefined} aria-label={label} aria-hidden={label ? undefined : 'true'}>
+      <path d={icon.path} fill="currentColor" />
+    </svg>
+  ) : (
+    <span class="icon mono" style={`--s:${size}px`} aria-hidden="true">{mono}</span>
+  )
+}
+
+<style>
+  .icon {
+    flex: none;
+    display: block;
+  }
+  .mono {
+    display: inline-grid;
+    place-items: center;
+    width: var(--s);
+    height: var(--s);
+    border: 1px solid currentColor;
+    font-family: var(--font-data);
+    font-size: calc(var(--s) * 0.5);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+</style>

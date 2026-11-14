@@ -1,0 +1,171 @@
+---
+// Schematic: one satellite over one station for two hours. Shows why fixed slots
+// fail (they ignore visibility and exclusion cones) and how bookings that start
+// from visibility windows fit. Times are minutes from 0 to `span`.
+type Seg = [number, number];
+interface Props {
+  span?: number;
+  passes: Seg[];
+  cones: Seg[];
+  old: Seg[];
+  next: Seg[];
+  caption?: string;
+}
+const { span = 120, passes, cones, old, next, caption } = Astro.props;
+
+const pos = ([a, b]: Seg) => `left:${(a / span) * 100}%;width:${((b - a) / span) * 100}%`;
+
+// Split each old slot into the parts that were usable and the parts that weren't.
+const usable = (t: number) =>
+  passes.some(([a, b]) => t >= a && t < b) && !cones.some(([a, b]) => t >= a && t < b);
+const split = ([a, b]: Seg) => {
+  const out: { seg: Seg; ok: boolean }[] = [];
+  let start = a;
+  let state = usable(a);
+  for (let t = a + 1; t <= b; t++) {
+    const s = t < b ? usable(t) : !state;
+    if (s !== state) {
+      out.push({ seg: [start, t], ok: state });
+      start = t;
+      state = s;
+    }
+  }
+  return out;
+};
+const ticks = Array.from({ length: span / 30 + 1 }, (_, i) => i * 30);
+const fmt = (m: number) => `+${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
+---
+
+<figure class="tl">
+  <div class="grid" role="img" aria-label="Schematic timeline. Old fixed slots spend most of their time when the satellite is out of view or inside an exclusion cone; new bookings sit inside the visible passes and step around the cone.">
+    <div class="row">
+      <span class="lab label">Satellite in view</span>
+      <span class="track">{passes.map((p) => <span class="pass" style={pos(p)} />)}</span>
+    </div>
+    <div class="row">
+      <span class="lab label">Exclusion cone</span>
+      <span class="track">{cones.map((p) => <span class="cone" style={pos(p)} />)}</span>
+    </div>
+    <div class="row sep">
+      <span class="lab label">Old · fixed slots</span>
+      <span class="track">
+        {old.flatMap(split).map(({ seg, ok }) => <span class:list={['bk', ok ? 'good' : 'bad']} style={pos(seg)} />)}
+      </span>
+    </div>
+    <div class="row">
+      <span class="lab label">New · from passes</span>
+      <span class="track">{next.map((p) => <span class="bk good new" style={pos(p)} />)}</span>
+    </div>
+    <div class="row axis" aria-hidden="true">
+      <span class="lab"></span>
+      <span class="track">
+        {ticks.map((t) => <span class="tick data" style={`left:${(t / span) * 100}%`}>{fmt(t)}</span>)}
+      </span>
+    </div>
+  </div>
+  <p class="key label" aria-hidden="true">
+    <span><i class="sw pass"></i>Visible above the mask</span>
+    <span><i class="sw cone"></i>Cone</span>
+    <span><i class="sw good"></i>Usable booking</span>
+    <span><i class="sw bad"></i>Booked, unusable</span>
+  </p>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .grid {
+    border-top: 1px solid var(--rule-strong);
+    border-bottom: 1px solid var(--rule-strong);
+    padding-block: 6px;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+    padding-block: 6px;
+  }
+  .row.sep {
+    margin-top: 6px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--rule);
+  }
+  .lab {
+    color: var(--ink-2);
+  }
+  .track {
+    position: relative;
+    height: 18px;
+    background: repeating-linear-gradient(
+      to right,
+      var(--rule) 0 1px,
+      transparent 1px 25%
+    );
+  }
+  .track > span {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+  }
+  .pass {
+    background: color-mix(in srgb, var(--ok) 22%, transparent);
+    border: 1px solid var(--ok);
+  }
+  .cone {
+    background: repeating-linear-gradient(-45deg, var(--accent) 0 2px, transparent 2px 6px);
+  }
+  .bk {
+    top: 2px !important;
+    bottom: 2px !important;
+  }
+  .good {
+    background: var(--ink);
+  }
+  .bad {
+    background: repeating-linear-gradient(-45deg, var(--accent) 0 3px, color-mix(in srgb, var(--accent) 35%, transparent) 3px 6px);
+  }
+  .axis .track {
+    height: 16px;
+    background: none;
+  }
+  .tick {
+    transform: translateX(-50%);
+    color: var(--ink-3);
+    font-size: 0.6875rem;
+  }
+  .tick:first-child {
+    transform: none;
+  }
+  .tick:last-child {
+    transform: translateX(-100%);
+  }
+  .key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin-top: 12px;
+  }
+  .key span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sw {
+    display: inline-block;
+    width: 14px;
+    height: 10px;
+  }
+  .sw.pass {
+    border: 1px solid var(--ok);
+    background: color-mix(in srgb, var(--ok) 22%, transparent);
+  }
+  .sw.cone {
+    background: repeating-linear-gradient(-45deg, var(--accent) 0 2px, transparent 2px 5px);
+  }
+  @media (min-width: 640px) {
+    .row {
+      grid-template-columns: 11rem minmax(0, 1fr);
+      align-items: center;
+      gap: 16px;
+    }
+  }
+</style>

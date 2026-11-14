@@ -1,0 +1,118 @@
+---
+// Paired bars, old against new, one metric per row. Each row is scaled to its own
+// larger value, so the bars compare old with new, not one metric with another.
+interface Row {
+  label: string;
+  old: number;
+  new: number;
+  /** Text shown for each value; defaults to the number. */
+  oldText?: string;
+  newText?: string;
+}
+interface Props {
+  rows: Row[];
+  caption?: string;
+}
+const { rows, caption } = Astro.props;
+const pct = (v: number, max: number) => (max === 0 ? 0 : Math.max((v / max) * 100, v > 0 ? 1.5 : 0));
+---
+
+<figure class="ba">
+  <p class="legend label" aria-hidden="true">
+    <span><i class="sw old"></i>Old scheduler</span>
+    <span><i class="sw new"></i>New scheduler</span>
+  </p>
+  <dl>
+    {
+      rows.map((r) => {
+        const max = Math.max(r.old, r.new);
+        return (
+          <div class="row">
+            <dt>{r.label}</dt>
+            <dd>
+              <span class="track">
+                <span class="fill old" style={`width:${pct(r.old, max)}%`} />
+              </span>
+              <span class="v data">
+                <span class="visually-hidden">Old: </span>
+                {r.oldText ?? r.old}
+              </span>
+              <span class="track">
+                <span class="fill new" style={`width:${pct(r.new, max)}%`} />
+              </span>
+              <span class="v data strong">
+                <span class="visually-hidden">New: </span>
+                {r.newText ?? r.new}
+              </span>
+            </dd>
+          </div>
+        );
+      })
+    }
+  </dl>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .legend {
+    display: flex;
+    gap: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--rule-strong);
+  }
+  .legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sw {
+    width: 14px;
+    height: 8px;
+  }
+  .row {
+    display: grid;
+    gap: 8px 20px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  dt {
+    font-size: 0.9375rem;
+    line-height: 1.4;
+  }
+  dd {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 7.5em;
+    align-items: center;
+    gap: 5px 12px;
+  }
+  .track {
+    height: 10px;
+    background: color-mix(in srgb, var(--rule) 60%, transparent);
+  }
+  .fill {
+    display: block;
+    height: 100%;
+  }
+  .old {
+    background: var(--ink-3);
+  }
+  /* The fix reads as the same green as "got their time" elsewhere, not the accent,
+     which is red on Star-Sync's palette. */
+  .new {
+    background: var(--ok);
+  }
+  .v {
+    font-size: 0.8125rem;
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+  .v.strong {
+    color: var(--ink);
+  }
+  @media (min-width: 640px) {
+    .row {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      align-items: center;
+    }
+  }
+</style>

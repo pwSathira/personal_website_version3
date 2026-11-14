@@ -1,0 +1,122 @@
+---
+code: MSN-01
+order: 1
+title: Star-Sync
+summary: Books satellite contacts across Canadian ground stations. I rebuilt its scheduler around real visibility windows and put the whole app online as a static demo.
+dates: 2024 – 2026
+role: Full-stack developer on the capstone, sole developer on the 2026 rework
+team: Five students with the Canadian Space Agency as client, then solo
+stack: [Python, FastAPI, skyfield, PostgreSQL, Next.js, TypeScript, satellite.js, Docker]
+readout: { value: '16% → 100%', label: 'of booked time with the satellite in view' }
+links:
+  - { label: Live demo, href: 'https://starsync.polywertz.com' }
+  - { label: ss-core, href: 'https://github.com/polywertz/ss-core', note: 'API and scheduler' }
+  - { label: ss-web, href: 'https://github.com/polywertz/ss-web', note: 'Next.js app' }
+  - { label: ss-demo, href: 'https://github.com/polywertz/ss-demo', note: 'static build' }
+palette: starsync
+---
+
+import Flow from '../../components/Flow.astro';
+import Shot from '../../components/Shot.astro';
+import BeforeAfter from '../../components/BeforeAfter.astro';
+import Waffle from '../../components/Waffle.astro';
+import SlotTimeline from '../../components/SlotTimeline.astro';
+import capstone from '../../assets/missions/star-sync-capstone.png';
+import schedule from '../../assets/missions/star-sync-schedule.png';
+
+A satellite can only talk to the ground while it's above a station's horizon, which for a low orbit means a pass of about ten minutes, a few times a day. Star-Sync takes requests for that time from satellite missions and books them across a network of ground stations.
+
+There are two kinds of request. A **contact request** books one specific pass at one station, whole or not at all. An **RF time request** asks for some number of seconds anywhere in a window, spread over a minimum number of passes, and leaves the scheduler to pick the stations. Every booking has to obey four rules: a station tracks one satellite at a time, it needs five minutes between contacts to reconfigure, the satellite stays above the station's elevation mask for the whole booking, and no satellite transmits while an interfering satellite sits inside its exclusion cone.
+
+## The capstone shipped the app with a scheduler that guessed
+
+Star-Sync started as my 2024–25 capstone at York, built by five students with the Canadian Space Agency as the client. We planned sprints in JIRA and merged through reviewed pull requests. I made more than half the commits to the Next.js app: the RF request and satellite forms, the exclusion-cone editor, the login and first-run flow, and the work that moved the satellite and ground-station pages off mock data onto the API.
+
+<Shot
+  src={capstone}
+  alt="The capstone scheduling calendar: four ground stations as rows across three days in April 2025, with pastel booking blocks in each row."
+  label="Capstone build · April 2025"
+  caption="The calendar we shipped. Every block looks plausible; the next section checks them against the orbits."
+/>
+
+The app worked, but the scheduler cut time into fixed slots and checked overlaps by exact match. It never asked whether the satellite could see the station.
+
+<SlotTimeline
+  passes={[[10, 24], [52, 66], [92, 106]]}
+  cones={[[56, 61]]}
+  old={[[0, 15], [30, 45], [60, 75], [90, 105]]}
+  next={[[10, 24], [52, 56], [61, 66], [92, 106]]}
+  caption="Schematic: one satellite, one station, two hours. Slot sizes are illustrative; the measured effect is below."
+/>
+
+## Measured against skyfield, the old scheduler said yes to requests it couldn't keep
+
+In November 2026 I came back to the project and benchmarked the scheduler against skyfield, which computes when each satellite is actually overhead. The workload was 6 satellites, 3 stations and 150 requests over 24 hours.
+
+<BeforeAfter
+  rows={[
+    { label: 'Booked time with the satellite above the mask', old: 16, new: 100, oldText: '16%', newText: '100%' },
+    { label: 'Station time booked, against time requested', old: 3.6, new: 1, oldText: '3.6×', newText: '≈ 1×' },
+    { label: 'Hours a station was double-booked', old: 20.7, new: 0, oldText: '20.7 h', newText: '0' },
+    { label: "Requests marked scheduled that didn't get their time", old: 75, new: 0, oldText: '75 of 150', newText: '0' },
+  ]}
+  caption="Higher is better on the first row, lower on the rest. Each row is scaled to its own larger value."
+/>
+
+<Waffle
+  title="The old scheduler's 150 requests, one square each"
+  groups={[
+    { n: 66, label: 'reported scheduled, and got their time', tone: 'ok' },
+    { n: 75, label: "reported scheduled, but didn't get their time", tone: 'bad' },
+    { n: 9, label: 'reported as not scheduled', tone: 'off' },
+  ]}
+  caption="It reported 94% as scheduled; 44% actually were."
+/>
+
+The new scheduler books each request for at most its requested time plus one second per pass. Its numbers come from the test suite, which generates a workload, runs the scheduler and checks every booking against skyfield.
+
+## The new scheduler starts from when each satellite is visible
+
+<Flow
+  caption="app/services/scheduler.py in ss-core. Per-station busy lists enforce the 5-minute gap; per-satellite lists stop one satellite being booked at two stations."
+  steps={[
+    { k: 'passes', title: 'Find every pass', body: 'skyfield find_events for each satellite and station, above that station\'s mask.' },
+    { k: 'cones', title: 'Cut exclusion cones', body: 'Remove time when an interfering satellite is above the horizon and inside the cone, sampled every 10 s in batches.' },
+    { k: 'contacts', title: 'Book contacts whole', body: 'RF On to RF Off, higher priority first. A contact that doesn\'t fit is rejected, never split or moved.' },
+    { k: 'rf time', title: 'Fill RF time', body: 'Earliest deadline first, spread evenly over the passes still needed. A request that fails releases everything it held.' },
+    { k: 'outcome', title: 'Report each request', body: 'Scheduled, or failed with a reason: not visible, exclusion cone, station busy, satellite busy, window too short.' },
+  ]}
+/>
+
+I kept the scheduler greedy. An integer-programming solver could squeeze out a few more requests, but the measured problems were correctness problems, and a greedy pass over batched orbital maths places 150 requests in under 100 ms. On a generated workload close to capacity (3 satellites, 3 stations, 50 RF and 27 contact requests, one exclusion cone) it fulfils 52% of requests in about 70 ms, every one of them valid.
+
+Two smaller decisions came out of reading the spec closely. Uplink, telemetry and science data share a pass, so an RF request needs the longest of the three durations, not their sum. And the same rework locked down the API: until then, an unauthenticated `GET /hello/initdb` could drop every table.
+
+## The demo runs the whole app in the browser
+
+A recruiter isn't going to run `docker compose up`, so I built [ss-demo](https://github.com/polywertz/ss-demo): the real Next.js app, exported as static files, with the backend answered inside the browser.
+
+<Shot
+  src={schedule}
+  alt="The Star-Sync demo's schedule view: five Canadian ground stations as rows over 24 hours, with outlined visibility passes, filled bookings coloured by satellite, a red now line, and a row for 34 requests that could not be scheduled."
+  label="starsync.polywertz.com/schedule"
+  caption="The demo today. Outlined boxes are passes above each station's mask; filled boxes are bookings, so every booking sits inside a pass."
+/>
+
+<Flow
+  caption="ss-demo. ss-web's source is untouched; the build wraps _app.tsx and next.config.mjs."
+  steps={[
+    { k: 'ss-web', title: 'The real app', body: 'Unchanged. Every call to /api/v1 goes through its axios client or fetch.' },
+    { k: 'backend', title: 'In-browser API', body: 'Same validation, status codes and error messages as ss-core, so the app can\'t tell the difference.' },
+    { k: 'snapshot', title: 'ss-core\'s own output', body: '8 satellites, 5 stations, 6 cones and 688 requests over six weeks, with passes precomputed by skyfield.' },
+    { k: 'reschedule', title: 'TypeScript scheduler', body: 'A 245-line port runs after each change. New satellites get passes from SGP4 within 3 s of skyfield.' },
+  ]}
+/>
+
+The data had to look live on any day someone opens it. Day 0 of the snapshot is always today in UTC, so a pass that was "in two days" yesterday is still in two days. Orbits don't repeat daily, so each satellite's TLE moves with the data: the epoch advances a day at a time and the right ascension of the node turns 0.9856° a day to keep the ground track under the same clock time. A test moves a TLE 200 days and checks that the passes still land within 2 seconds.
+
+Changes a visitor makes live in `localStorage` and reset when the UTC day changes.
+
+## The scheduler still ignores station load
+
+The spec's third objective is to use ground stations evenly, and the scheduler doesn't try yet; it takes the first station that fits. It also meets `min_passes` by spreading time evenly rather than treating it as a goal. Both are next on the roadmap, ahead of hooking up the ground-station simulator so booked passes get reserved at the station.

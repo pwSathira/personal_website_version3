@@ -1,0 +1,75 @@
+---
+// A short support matrix: what works today and what doesn't yet.
+interface Row {
+  label: string;
+  detail: string;
+  ok: boolean;
+}
+interface Props {
+  rows: Row[];
+  caption?: string;
+}
+const { rows, caption } = Astro.props;
+---
+
+<figure class="support">
+  <ul>
+    {
+      rows.map((r) => (
+        <li class:list={{ no: !r.ok }}>
+          <span class="mark data" aria-hidden="true">{r.ok ? '✓' : '×'}</span>
+          <span class="txt">
+            <strong>{r.label}</strong>
+            <span class="detail data">{r.detail}</span>
+          </span>
+          <span class="state label">{r.ok ? 'Supported' : 'Next fix'}</span>
+        </li>
+      ))
+    }
+  </ul>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  ul {
+    list-style: none;
+    padding: 0;
+    border-top: 1px solid var(--rule-strong);
+  }
+  li {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .mark {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    font-size: 0.875rem;
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  .no .mark {
+    background: none;
+    border: 1px dashed var(--ink-3);
+    color: var(--ink-3);
+  }
+  .txt {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.9375rem;
+    line-height: 1.35;
+  }
+  .detail {
+    color: var(--ink-3);
+  }
+  .no .state {
+    color: var(--accent);
+  }
+</style>
