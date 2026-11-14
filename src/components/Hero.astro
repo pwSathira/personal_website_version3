@@ -1,0 +1,126 @@
+---
+import GroundTrack from './GroundTrack.astro';
+import { basics } from '../lib/cv';
+import Logo from './Logo.astro';
+
+const { station, status } = basics;
+---
+
+<section class="hero wrap" aria-labelledby="hero-name">
+  <div class="head">
+    <div class="lockup">
+      <Logo size={100} cells={20} dot={0.78} separate class="hero-mark" />
+      <h1 id="hero-name"><span class="line"><span>Sathira</span></span> <span class="line"><span>Williams</span></span></h1>
+    </div>
+    <div class="side">
+      <p class="role label">{basics.role} · {station.name}</p>
+      <p class="intro">{basics.intro}</p>
+      {
+        status.open && (
+          <p class="status data">
+            <span class="dot" aria-hidden="true" />
+            {status.text} · {status.where}
+          </p>
+        )
+      }
+      <div class="actions">
+        <a class="btn btn-primary" href={`mailto:${basics.email}`}>Email me</a>
+        <a class="btn" href={basics.resumeUrl} rel="noopener">Résumé <span class="arrow" aria-hidden="true">↗</span></a>
+        <a class="btn" href="#missions">See the work</a>
+      </div>
+    </div>
+  </div>
+
+  <GroundTrack />
+</section>
+
+<style>
+  .head {
+    display: grid;
+    gap: 32px;
+    padding-block: clamp(24px, 3vw, 36px) clamp(20px, 2.4vw, 28px);
+  }
+  /* Mark and name as one lockup: the mark runs from the cap line of
+     "Sathira" to the baseline of "Williams", so the pair reads as a block. */
+  .lockup {
+    --size: clamp(3rem, 11.5vw, 8.75rem);
+    display: flex;
+    align-items: flex-start;
+    gap: calc(var(--size) * 0.2);
+    font-size: var(--size);
+  }
+  .lockup :global(.hero-mark) {
+    flex: none;
+    width: 1.62em;
+    height: 1.62em;
+    margin-top: 0.1em;
+    color: var(--ink);
+  }
+  h1 {
+    font-size: 1em;
+    line-height: 0.86;
+    letter-spacing: -0.045em;
+    font-weight: 620;
+  }
+  /* Each line is its own mask so the name can rise into place. Only the
+     bottom edge clips: overflow: hidden would also cut the last letter,
+     which the tight tracking pushes past the line box. */
+  h1 .line {
+    display: block;
+    clip-path: inset(-0.5em -0.5em 0 -0.5em);
+    padding-bottom: 0.06em;
+    margin-bottom: -0.06em;
+  }
+  h1 .line > span {
+    display: block;
+  }
+  .side {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 52ch;
+  }
+  .role {
+    color: var(--accent);
+  }
+  .intro {
+    font-size: 1.1875rem;
+    line-height: 1.5;
+  }
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--ink-2);
+  }
+  .status .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ok);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--ok) 22%, transparent);
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 6px;
+  }
+  @media (min-width: 1000px) {
+    /* Lockup and text centred on each other: the text column is the taller
+       one, so bottom-aligning left a dead band above the name. */
+    .head {
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      gap: clamp(40px, 5vw, 80px);
+    }
+    /* Capped so the text column keeps ~46ch once the page hits max width. */
+    .lockup {
+      --size: clamp(3rem, 8.4vw, 7rem);
+    }
+    .side {
+      justify-self: end;
+    }
+  }
+</style>
+

@@ -1,0 +1,36 @@
+---
+// SS monogram as a dot matrix. `cells` sets the grid: use a coarse grid
+// (≈20) for small sizes so dots stay distinct, a fine one (≈60) for large.
+// `separate` draws each dot as its own <circle> so they can be animated
+// one by one; keep it for one-off, coarse marks (it emits a node per dot).
+// `solid` draws the filled SS instead, for small sizes where dots blur.
+import { markDots, markPoints, markSolid } from '../lib/logo';
+
+interface Props {
+  size: number;
+  cells?: number;
+  dot?: number; // dot diameter as a fraction of the cell
+  separate?: boolean;
+  solid?: boolean;
+  class?: string;
+}
+const { size, cells = 60, dot = 0.62, separate = false, solid = false, class: cls } = Astro.props;
+const { d, cell } = markDots(cells);
+const rad = +((cell * dot) / 2).toFixed(2);
+---
+
+<svg class:list={['logo', cls]} width={size} height={size} viewBox="0 0 100 100" aria-hidden="true">
+  {
+    solid ? (
+      <path d={markSolid()} fill="currentColor" />
+    ) : separate ? (
+      <g fill="currentColor">
+        {markPoints(cells).map((p) => (
+          <circle cx={p.x} cy={p.y} r={rad} />
+        ))}
+      </g>
+    ) : (
+      <path d={d} fill="none" stroke="currentColor" stroke-width={+(cell * dot).toFixed(2)} stroke-linecap="round" />
+    )
+  }
+</svg>

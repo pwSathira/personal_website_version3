@@ -1,37 +1,38 @@
 {
-  "name": "pw-website",
-  "version": "0.1.0",
+  "name": "pwsathira",
+  "version": "4.0.0",
   "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "astro dev",
+    "prebuild": "node scripts/fetch-tle.ts",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check && node scripts/check-orbit.ts",
+    "sync:cv": "node scripts/sync-cv.ts",
+    "build:map": "node scripts/build-map.ts",
+    "build:favicon": "node scripts/build-favicon.ts"
   },
   "dependencies": {
-    "@radix-ui/react-slot": "^1.1.0",
-    "@tailwindcss/typography": "^0.5.16",
-    "animate.css": "^4.1.1",
-    "class-variance-authority": "^0.7.0",
-    "clsx": "^2.1.1",
-    "framer-motion": "^11.11.9",
-    "gray-matter": "^4.0.3",
-    "hover.css": "^2.3.2",
-    "lucide-react": "^0.441.0",
-    "marked": "^15.0.11",
-    "motion": "^12.9.4",
-    "next": "^14.2.28",
-    "react": "^18",
-    "react-dom": "^18",
-    "react-icons": "^5.3.0",
-    "tailwind-merge": "^2.5.4",
-    "tailwind-scrollbar-hide": "^2.0.0",
-    "tailwindcss-animate": "^1.0.7"
+    "@astrojs/mdx": "^8.1.6",
+    "@astrojs/sitemap": "^3.7.5",
+    "@fontsource-variable/familjen-grotesk": "^5.3.0",
+    "astro": "^7.4.12",
+    "motion": "^12.43.0"
   },
   "devDependencies": {
-    "eslint": "^8",
-    "eslint-config-next": "14.2.5",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1"
+    "@astrojs/check": "^0.9.12",
+    "@types/d3-geo": "^3.1.1",
+    "@types/topojson-client": "^3.1.5",
+    "d3-geo": "^3.1.2",
+    "satellite.js": "^7.2.0",
+    "simple-icons": "^16.37.0",
+    "topojson-client": "^3.1.0",
+    "typescript": "^6.0.3",
+    "world-atlas": "^2.0.2",
+    "yaml": "^2.9.1"
   }
 }

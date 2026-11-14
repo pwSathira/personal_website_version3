@@ -1,0 +1,72 @@
+---
+// A row of measured figures: big value, short label, optional source line.
+interface Stat {
+  value: string;
+  label: string;
+  /** Fraction 0–1 drawn as a meter under the value. */
+  meter?: number;
+}
+interface Props {
+  stats: Stat[];
+  source?: string;
+}
+const { stats, source } = Astro.props;
+---
+
+<figure class="stats">
+  <dl>
+    {
+      stats.map((s) => (
+        <div>
+          <dt class="label">{s.label}</dt>
+          <dd>
+            <span class="v">{s.value}</span>
+            {s.meter !== undefined && (
+              <span class="meter" aria-hidden="true">
+                <span style={`width:${s.meter * 100}%`} />
+              </span>
+            )}
+          </dd>
+        </div>
+      ))
+    }
+  </dl>
+  {source && <figcaption>{source}</figcaption>}
+</figure>
+
+<style>
+  dl {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    border-top: 1px solid var(--rule-strong);
+  }
+  dl > div {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: 6px;
+    padding: 14px 16px 16px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .v {
+    display: block;
+    font-size: clamp(2rem, 5vw, 2.75rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .meter {
+    display: block;
+    height: 4px;
+    margin-top: 10px;
+    max-width: 120px;
+    background: var(--rule);
+  }
+  .meter span {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+  }
+</style>

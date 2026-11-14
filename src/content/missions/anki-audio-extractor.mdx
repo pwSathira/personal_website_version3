@@ -1,0 +1,73 @@
+---
+code: MSN-02
+order: 2
+title: Anki Audio Extractor
+summary: Pulls every audio clip out of an Anki deck. It started as a script for my kana-learning site and shipped as an Anki add-on plus a desktop app.
+dates: '2025'
+role: Sole developer
+team: Solo
+stack: [Python, Qt (Anki add-on API), Electron, Node.js, Express, GitHub Actions]
+readout: { value: '338', label: 'downloads from AnkiWeb' }
+links:
+  - { label: AnkiWeb add-on, href: 'https://ankiweb.net/shared/info/2104311619' }
+  - { label: Repository, href: 'https://github.com/pwSathira/Anki-Audio-Extractor' }
+palette: anki
+---
+
+import Flow from '../../components/Flow.astro';
+import ApkgAnatomy from '../../components/ApkgAnatomy.astro';
+import Stats from '../../components/Stats.astro';
+import Support from '../../components/Support.astro';
+
+I was building Mushoku, a site that teaches hiragana and katakana side by side the way English teaches lower and upper case, and it needed a native speaker saying every character. Plenty of Anki decks already had those recordings. Nothing would get them out.
+
+## An Anki package is a zip with a lookup table
+
+An `.apkg` file is a zip archive. Its media are stored as `0`, `1`, `2` and so on, and a JSON file called `media` maps each number back to its real name. The extractor reads that map and writes out every `.mp3`, `.ogg`, `.wav` or `.m4a` under its real name.
+
+<ApkgAnatomy
+  entries={[
+    { id: '0', name: 'a.mp3' },
+    { id: '1', name: 'ka.mp3' },
+    { id: '2', name: 'ka_stroke.png' },
+    { id: '3', name: 'sa.ogg' },
+  ]}
+  caption="An example kana deck. Numbered entries go in, named audio files come out; images are left behind."
+/>
+
+That logic fit in one function. Getting it to people took three tries.
+
+<Flow
+  caption="The extraction logic stayed the same; what changed was where it ran."
+  steps={[
+    { k: 'v1', title: 'Python script', body: 'A proof that the media map held what I thought it did.' },
+    { k: 'v2', title: 'Electron desktop app', body: 'Drag in a deck, pick a folder. GitHub Actions builds installers for macOS and Windows.' },
+    { k: 'v3', title: 'Anki add-on', body: 'Tools → Extract Audio from Package, inside the app people already use. Installed from AnkiWeb by code.' },
+  ]}
+/>
+
+## Unsigned installers kept desktop users away
+
+The desktop app worked, but I didn't have code-signing certificates, so macOS and Windows both warn on first launch that the developer can't be verified. For a free tool from a stranger, that warning ends the install. I moved the same logic into a Python add-on that runs inside Anki and installs from AnkiWeb, where language learners already get their add-ons. The desktop version stays on GitHub for anyone who wants it.
+
+## Results
+
+<Stats
+  stats={[
+    { value: '338', label: 'Downloads' },
+    { value: '2 / 3', label: 'Ratings thumbs up', meter: 2 / 3 },
+    { value: '25.02', label: 'Anki version supported' },
+  ]}
+  source="AnkiWeb add-on page, last updated 12 May 2026."
+/>
+
+## Newer exports use a different media format
+
+Anki 2.1.50 and later can export packages whose media map is binary and whose files are compressed. Both versions of the extractor read only the older JSON map.
+
+<Support
+  rows={[
+    { label: 'Legacy packages', detail: 'JSON media map · files stored as-is', ok: true },
+    { label: 'Anki 2.1.50+ packages', detail: 'binary media map · compressed files', ok: false },
+  ]}
+/>

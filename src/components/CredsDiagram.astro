@@ -1,0 +1,161 @@
+---
+// Blue-Link: where the database password lives, and where it lives in NyxOps, its successor.
+interface Props {
+  caption?: string;
+}
+const { caption } = Astro.props;
+const terminals = ['Terminal 01', 'Terminal 02', 'Terminal 03'];
+---
+
+<figure class="creds wide">
+  <div class="panels">
+    <section class="panel">
+      <p class="label head">Blue-Link</p>
+      <div class="terms">
+        {
+          terminals.map((t) => (
+            <div class="node term">
+              <span>{t}</span>
+              <span class="key secret data">DB password</span>
+            </div>
+          ))
+        }
+      </div>
+      <p class="link data">JDBC, one connection per terminal</p>
+      <div class="node db"><span>Azure SQL</span></div>
+      <p class="note">A stolen terminal carries the password to the whole database.</p>
+    </section>
+
+    <section class="panel">
+      <p class="label head">NyxOps · planned</p>
+      <div class="terms">
+        {
+          terminals.map((t) => (
+            <div class="node term">
+              <span>{t}</span>
+              <span class="key data">Officer token</span>
+            </div>
+          ))
+        }
+      </div>
+      <p class="link data">HTTPS, Keycloak token per officer</p>
+      <div class="node api">
+        <span>FastAPI service</span>
+        <span class="key secret data">DB password</span>
+      </div>
+      <p class="link data">One connection pool</p>
+      <div class="node db"><span>PostgreSQL</span></div>
+      <p class="note">A lost terminal means revoking one officer's session.</p>
+    </section>
+  </div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .panels {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .panel {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 14px 16px 16px;
+    border: 1px solid var(--rule-strong);
+  }
+  .head {
+    margin-bottom: 12px;
+  }
+  .terms {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .node {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 10px 12px;
+    background: var(--bg-raised);
+    border: 1px solid var(--rule);
+    font-size: 0.875rem;
+    line-height: 1.3;
+  }
+  .node.db,
+  .node.api {
+    align-items: center;
+    text-align: center;
+  }
+  .node.db {
+    border-color: var(--accent);
+  }
+  .key {
+    align-self: flex-start;
+    padding: 1px 6px;
+    font-size: 0.6875rem;
+    border: 1px solid var(--rule-strong);
+    color: var(--ink-2);
+  }
+  @media (max-width: 520px) {
+    .terms .node {
+      padding: 8px 6px 10px;
+    }
+    .terms .key {
+      padding-inline: 4px;
+      font-size: 0.625rem;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+  }
+  .api .key {
+    align-self: center;
+  }
+  /* The database password, wherever it lives: three copies today, one behind the API. */
+  .key.secret {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+  /* A labelled vertical connector with an arrowhead. */
+  .link {
+    position: relative;
+    margin: 0;
+    padding: 12px 0 14px 18px;
+    color: var(--ink-3);
+    font-size: 0.6875rem;
+  }
+  .link::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 0;
+    bottom: 4px;
+    border-left: 1px solid var(--accent);
+  }
+  .link::after {
+    content: '';
+    position: absolute;
+    left: 2px;
+    bottom: 3px;
+    width: 8px;
+    height: 8px;
+    border-right: 1px solid var(--accent);
+    border-bottom: 1px solid var(--accent);
+    transform: rotate(45deg);
+  }
+  .note {
+    margin-top: 12px;
+    font-size: 0.875rem;
+    color: var(--ink-2);
+  }
+  @media (min-width: 760px) {
+    .panels {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .panel:first-child .note {
+      margin-top: auto;
+      padding-top: 12px;
+    }
+  }
+</style>

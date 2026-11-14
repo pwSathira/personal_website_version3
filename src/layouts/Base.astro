@@ -1,0 +1,282 @@
+---
+import '../styles/global.css';
+import { basics, BUILD_TIME } from '../lib/cv';
+import Logo from '../components/Logo.astro';
+import tle from '../data/tle.json';
+import monoUrl from '../fonts/commit-mono-400-subset.woff2?url';
+import textUrl from '@fontsource-variable/familjen-grotesk/files/familjen-grotesk-latin-wght-normal.woff2?url';
+
+interface Props {
+  title?: string;
+  description?: string;
+  palette?: 'starsync' | 'anki' | 'bluelink';
+}
+const { title, description, palette } = Astro.props;
+const pageTitle = title ? `${title} · Sathira Williams` : 'Sathira Williams · Full-stack developer';
+const desc =
+  description ??
+  'Sathira Williams is a full-stack developer in Vancouver. Projects include Star-Sync, a satellite ground-station scheduler, and an Anki audio extractor.';
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const isHome = Astro.url.pathname === '/';
+const nav = [
+  { href: '/#missions', label: 'Missions' },
+  { href: '/#pass-log', label: 'Pass log' },
+  { href: '/#spec', label: 'Spec' },
+  { href: '/#contact', label: 'Contact' },
+];
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: basics.name,
+  jobTitle: basics.role,
+  url: basics.url,
+  email: `mailto:${basics.email}`,
+  address: { '@type': 'PostalAddress', addressLocality: 'Vancouver', addressRegion: 'BC', addressCountry: 'CA' },
+  alumniOf: ['York University'],
+  sameAs: Object.values(basics.links),
+};
+const built = BUILD_TIME.toISOString().slice(0, 10);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={desc} />
+    <link rel="canonical" href={canonical} />
+    <link rel="preload" href={textUrl} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={monoUrl} as="font" type="font/woff2" crossorigin />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#0f0e0c" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f1eee6" media="(prefers-color-scheme: light)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@polywertz" />
+    <script is:inline>
+      (() => {
+        const d = document.documentElement;
+        // A saved light/dark choice, applied before first paint; otherwise follow the system.
+        try {
+          const t = localStorage.getItem('theme');
+          if (t === 'light' || t === 'dark') d.dataset.theme = t;
+        } catch {}
+        // Opt in to entrance motion; fall back to a static page if the motion module never loads.
+        if (matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+          d.classList.add('motion');
+          setTimeout(() => window.__motion || d.classList.remove('motion'), 3000);
+        }
+      })();
+    </script>
+    {isHome && <script type="application/ld+json" set:html={JSON.stringify(person)} />}
+  </head>
+  <body data-palette={palette}>
+    <a class="skip visually-hidden" href="#main">Skip to content</a>
+    <header class="top">
+      <div class="wrap top-inner">
+        <a class="mark" href="/" aria-label="Sathira Williams, home">
+          <Logo size={24} solid />
+          <span>Sathira Williams</span>
+        </a>
+        <nav aria-label="Sections">
+          <ul>
+            {nav.map((n) => <li><a href={n.href}>{n.label}</a></li>)}
+          </ul>
+        </nav>
+        <button class="theme" type="button" data-theme-toggle aria-label="Switch colour theme">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+            <circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5" />
+            <path class="theme-fill" d="M8 1.75a6.25 6.25 0 0 1 0 12.5z" fill="currentColor" />
+          </svg>
+        </button>
+        <a class="top-cta" href={basics.resumeUrl} rel="noopener">Résumé</a>
+      </div>
+      <span class="progress" data-progress aria-hidden="true"></span>
+    </header>
+    <main id="main">
+      <slot />
+    </main>
+    <footer class="foot">
+      <div class="wrap foot-brand">
+        <Logo size={112} cells={48} class="foot-logo" />
+        <p class="label">SW · {basics.station.code}</p>
+      </div>
+      <div class="wrap foot-inner data">
+        <p>© {BUILD_TIME.getFullYear()} {basics.name}</p>
+        <p>
+          Built with Astro. Source on <a href="https://github.com/pwSathira/personal_website_version3">GitHub</a>.
+        </p>
+        <p>
+          Last build {built} · {tle.name} TLE from <a href="https://celestrak.org">CelesTrak</a>
+        </p>
+      </div>
+    </footer>
+    <script>
+      import '../scripts/theme';
+      import '../scripts/motion';
+    </script>
+  </body>
+</html>
+
+<style>
+  .skip:focus {
+    position: fixed !important;
+    top: 8px;
+    left: 8px;
+    width: auto;
+    height: auto;
+    clip: auto;
+    z-index: 100;
+    padding: 8px 12px;
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  .top {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .progress {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  :global(html:not(.motion)) .progress {
+    display: none;
+  }
+  .top-inner {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    height: 56px;
+  }
+  .mark :global(.logo) {
+    flex: none;
+    transition: color 0.2s var(--ease);
+  }
+  .mark:hover :global(.logo) {
+    color: var(--accent);
+  }
+  .mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  nav {
+    margin-left: auto;
+  }
+  nav ul {
+    display: none;
+    list-style: none;
+    padding: 0;
+    gap: 4px;
+  }
+  nav a,
+  .top-cta {
+    display: inline-block;
+    padding: 6px 10px;
+    font-family: var(--font-data);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    color: var(--ink-2);
+  }
+  nav a:hover {
+    color: var(--ink);
+  }
+  .theme {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    margin-left: auto;
+    padding: 0;
+    border: 1px solid transparent;
+    background: none;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .theme:hover {
+    color: var(--ink);
+    border-color: var(--rule-strong);
+  }
+  /* The filled half turns with the theme: right half filled in dark, left in light. */
+  .theme svg {
+    transition: transform 0.5s var(--ease);
+  }
+  :global(html[data-theme='light']) .theme svg {
+    transform: rotate(180deg);
+  }
+  @media (prefers-color-scheme: light) {
+    :global(html:not([data-theme='dark'])) .theme svg {
+      transform: rotate(180deg);
+    }
+  }
+  .top-cta {
+    color: var(--ink);
+    border: 1px solid var(--rule-strong);
+  }
+  .top-cta:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  @media (min-width: 760px) {
+    nav ul {
+      display: flex;
+    }
+    .theme {
+      margin-left: 0;
+    }
+  }
+  .foot {
+    margin-top: clamp(80px, 12vw, 160px);
+    border-top: 1px solid var(--rule);
+    color: var(--ink-3);
+  }
+  .foot-brand {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    padding-top: clamp(32px, 5vw, 56px);
+  }
+  .foot-brand :global(.foot-logo) {
+    color: var(--ink-2);
+    transition: color 0.4s var(--ease);
+  }
+  .foot-brand:hover :global(.foot-logo) {
+    color: var(--accent);
+  }
+  .foot-inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 32px;
+    padding-block: 24px 32px;
+  }
+  .foot-inner p:last-child {
+    margin-left: auto;
+  }
+  @media (max-width: 640px) {
+    .foot-inner p:last-child {
+      margin-left: 0;
+    }
+  }
+</style>

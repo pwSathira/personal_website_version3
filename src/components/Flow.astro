@@ -1,0 +1,98 @@
+---
+// A numbered pipeline diagram. Columns on wide screens, a vertical chain on phones.
+interface Step {
+  k: string;
+  title: string;
+  body: string;
+}
+interface Props {
+  steps: Step[];
+  caption?: string;
+}
+const { steps, caption } = Astro.props;
+---
+
+<figure class="flow wide">
+  <ol style={`--n:${steps.length}`}>
+    {
+      steps.map((s, i) => (
+        <li>
+          <span class="k data">
+            {String(i + 1).padStart(2, '0')} · {s.k}
+          </span>
+          <strong>{s.title}</strong>
+          <span class="body">{s.body}</span>
+        </li>
+      ))
+    }
+  </ol>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .flow ol {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 0;
+    border: 1px solid var(--rule-strong);
+  }
+  .flow li {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px 16px 16px;
+    margin: 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 0.9375rem;
+    line-height: 1.45;
+  }
+  .flow li:last-child {
+    border-bottom: 0;
+  }
+  /* Arrow between steps. */
+  .flow li:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 24px;
+    bottom: -6px;
+    width: 10px;
+    height: 10px;
+    background: var(--bg);
+    border-right: 1px solid var(--accent);
+    border-bottom: 1px solid var(--accent);
+    transform: rotate(45deg);
+    z-index: 1;
+  }
+  .k {
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  strong {
+    font-size: 1.0625rem;
+  }
+  .body {
+    color: var(--ink-2);
+  }
+  @media (min-width: 900px) {
+    .flow ol {
+      grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    }
+    .flow li {
+      border-bottom: 0;
+      border-right: 1px solid var(--rule);
+    }
+    .flow li:last-child {
+      border-right: 0;
+    }
+    .flow li:not(:last-child)::after {
+      left: auto;
+      right: -6px;
+      top: 22px;
+      bottom: auto;
+      transform: rotate(-45deg);
+    }
+  }
+</style>

@@ -1,0 +1,123 @@
+---
+import { skills } from '../data/site';
+import Icon from './Icon.astro';
+
+// Marks for each spec item. Combined items ("Vue / Nuxt") get one mark per tool;
+// items with no logo get a monogram.
+type Mark = { slug: string } | { mono: string };
+const MARKS: Record<string, Mark[]> = {
+  TypeScript: [{ slug: 'typescript' }],
+  React: [{ slug: 'react' }],
+  'Next.js': [{ slug: 'nextdotjs' }],
+  'Vue / Nuxt': [{ slug: 'vuedotjs' }, { slug: 'nuxt' }],
+  TailwindCSS: [{ slug: 'tailwindcss' }],
+  Python: [{ slug: 'python' }],
+  FastAPI: [{ slug: 'fastapi' }],
+  'Node.js': [{ slug: 'nodedotjs' }],
+  Java: [{ slug: 'openjdk' }],
+  'Spring Boot': [{ slug: 'springboot' }],
+  'tRPC, Prisma, Zod': [{ slug: 'trpc' }, { slug: 'prisma' }, { slug: 'zod' }],
+  PostgreSQL: [{ slug: 'postgresql' }],
+  MySQL: [{ slug: 'mysql' }],
+  Redis: [{ slug: 'redis' }],
+  RabbitMQ: [{ slug: 'rabbitmq' }],
+  MinIO: [{ slug: 'minio' }],
+  'Docker & Compose': [{ slug: 'docker' }],
+  'GitHub Actions': [{ slug: 'githubactions' }],
+  Linux: [{ slug: 'linux' }],
+  Azure: [{ mono: 'Az' }],
+  'Vercel & Cloudflare Pages': [{ slug: 'vercel' }, { slug: 'cloudflarepages' }],
+  'PyTest & JUnit': [{ slug: 'pytest' }, { slug: 'junit5' }],
+  'Structured logging': [{ mono: 'Lg' }],
+  'Agile sprints in JIRA': [{ slug: 'jira' }],
+  'Technical writing': [{ mono: 'Tw' }],
+};
+for (const g of skills) for (const i of g.items) if (!MARKS[i]) throw new Error(`SpecSheet: no mark for "${i}"`);
+---
+
+<section id="spec" class="section wrap" aria-labelledby="spec-title">
+  <div class="section-head">
+    <span class="label">03 · Spec sheet</span>
+    <h2 id="spec-title">Tools I've shipped with</h2>
+    <p>The stack behind the jobs and projects above.</p>
+  </div>
+
+  <dl class="spec">
+    {
+      skills.map((g, gi) => (
+        <div class="row">
+          <dt class="label">
+            <span class="idx">{String(gi + 1).padStart(2, '0')}</span>
+            {g.group}
+          </dt>
+          <dd>
+            <ul>
+              {g.items.map((item) => (
+                <li>
+                  <span class="marks">
+                    {MARKS[item].map((m) => ('slug' in m ? <Icon slug={m.slug} /> : <Icon mono={m.mono} />))}
+                  </span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </dd>
+        </div>
+      ))
+    }
+  </dl>
+</section>
+
+<style>
+  /* One row per group: the group name sits in the same 200px column as the
+     section label above, and the tools fill a regular grid beside it. */
+  .spec {
+    border-top: 1px solid var(--rule);
+  }
+  .row {
+    display: grid;
+    gap: 14px;
+    padding-block: 18px 20px;
+    border-bottom: 1px solid var(--rule);
+  }
+  dt {
+    display: flex;
+    gap: 12px;
+    padding-top: 4px;
+  }
+  .idx {
+    color: var(--ink-3);
+    opacity: 0.7;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
+    gap: 4px 24px;
+  }
+  li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 34px;
+  }
+  .marks {
+    display: inline-flex;
+    gap: 6px;
+    color: var(--ink-2);
+    transition: color 0.2s;
+  }
+  li:hover .marks {
+    color: var(--ink);
+  }
+  @media (min-width: 860px) {
+    ul {
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    }
+    .row {
+      grid-template-columns: 200px minmax(0, 1fr);
+      gap: 24px;
+    }
+  }
+</style>

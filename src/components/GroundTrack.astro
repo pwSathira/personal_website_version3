@@ -1,0 +1,461 @@
+---
+import { site } from '../data/site';
+import tle from '../data/tle.json';
+
+const { station } = site;
+const norad = tle.line1.slice(2, 7);
+const caption =
+  `Live position of ${tle.name}, one of the eight Canadian satellites in Star-Sync's demo fleet, and its passes over ` +
+  `${station.name} for the next 22 hours (above a ${station.mask}° mask, like Star-Sync's stations). ` +
+  `Your browser computes the orbit from a TLE fetched at build time.`;
+const fmt = (v: number, pos: string, neg: string) => `${Math.abs(v).toFixed(4)}° ${v >= 0 ? pos : neg}`;
+---
+
+<figure class="gt" data-ground-track>
+  <div class="gt-head data">
+    <span><span class="label">Sat</span> {tle.name} <span class="muted">· NORAD {norad}</span></span>
+    <span><span class="label">Stn</span> {station.code} <span class="muted">· {fmt(station.lat, 'N', 'S')} {fmt(station.lon, 'E', 'W')}</span></span>
+    <span class="gt-clock"><span data-clock>--:--:--</span> <span class="muted">PT</span></span>
+    <span class="gt-state" data-r="state" data-aos="false">
+      <span class="dot" aria-hidden="true"></span><span data-r="stateText">Acquiring</span>
+    </span>
+  </div>
+
+  <div class="gt-map">
+    <canvas aria-hidden="true"></canvas>
+    <noscript><p class="data gt-nojs">The live ground track needs JavaScript. Everything else on this site works without it.</p></noscript>
+  </div>
+
+  <div class="gt-passes" aria-hidden="true">
+    <div class="gt-passes-track" data-r="passes"></div>
+    <div class="gt-passes-axis data" data-r="axis"></div>
+  </div>
+
+  <dl class="gt-readouts data">
+    <div><dt class="label">Lat</dt><dd data-r="lat">—</dd></div>
+    <div><dt class="label">Lon</dt><dd data-r="lon">—</dd></div>
+    <div><dt class="label">Alt</dt><dd data-r="alt">—</dd></div>
+    <div><dt class="label">Elev from {station.code}</dt><dd data-r="elev">—</dd></div>
+    <div class="wide"><dt class="label" data-r="nextLabel">Next pass</dt><dd data-r="next">—</dd></div>
+  </dl>
+
+  <figcaption class="data">{caption}</figcaption>
+</figure>
+
+<style>
+  .gt {
+    border: 1px solid var(--rule-strong);
+    background: var(--bg);
+  }
+  .gt-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 24px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .gt-clock {
+    margin-left: auto;
+  }
+  .gt-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .gt-state .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1px solid var(--ink-3);
+  }
+  .gt-state[data-aos='true'] {
+    color: var(--accent);
+  }
+  .gt-state[data-aos='true'] .dot {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 25%, transparent);
+  }
+  .gt-map {
+    position: relative;
+    aspect-ratio: 240 / 94;
+  }
+  .gt-map canvas {
+    width: 100%;
+    height: 100%;
+  }
+  .gt-nojs {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    color: var(--ink-3);
+    text-align: center;
+  }
+  .gt-passes {
+    border-top: 1px solid var(--rule);
+    padding: 10px 14px 8px;
+  }
+  .gt-passes-track {
+    position: relative;
+    height: 14px;
+    background: repeating-linear-gradient(90deg, var(--rule) 0 1px, transparent 1px calc(100% / 22));
+  }
+  .gt-passes-track :global(.pass) {
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    min-width: 2px;
+    background: var(--ink-2);
+  }
+  .gt-passes-track :global(.pass.now) {
+    background: var(--accent);
+  }
+  .gt-passes-axis {
+    position: relative;
+    height: 16px;
+    margin-top: 4px;
+    color: var(--ink-3);
+    font-size: 0.625rem;
+  }
+  .gt-passes-axis :global(span) {
+    position: absolute;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+  .gt-readouts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid var(--rule);
+  }
+  .gt-readouts > div {
+    padding: 10px 14px;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .gt-readouts dd {
+    font-size: 0.875rem;
+    color: var(--ink);
+    margin-top: 2px;
+  }
+  .gt-readouts .wide {
+    grid-column: 1 / -1;
+  }
+  @media (min-width: 760px) {
+    .gt-readouts {
+      grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(0, 2fr);
+    }
+    .gt-readouts > div {
+      border-bottom: 0;
+    }
+    .gt-readouts .wide {
+      grid-column: auto;
+      border-right: 0;
+    }
+  }
+  figcaption {
+    padding: 10px 14px 12px;
+    border-top: 1px solid var(--rule);
+    color: var(--ink-3);
+  }
+</style>
+
+<script>
+  import { parseTle, propagate, elevation, footprintRadius, type SubPoint } from '../lib/orbit';
+  import { MAP } from '../lib/map';
+  import { site } from '../data/site';
+  import tle from '../data/tle.json';
+  import landmask from '../data/landmask.json';
+
+  const root = document.querySelector<HTMLElement>('[data-ground-track]');
+  if (root) init(root);
+
+  function init(root: HTMLElement) {
+    const el = parseTle(tle.line1, tle.line2);
+    const st = site.station;
+    const canvas = root.querySelector('canvas')!;
+    const ctx = canvas.getContext('2d')!;
+    const r = (k: string) => root.querySelector<HTMLElement>(`[data-r="${k}"]`)!;
+    const bits = Uint8Array.from(atob(landmask.bits), (c) => c.charCodeAt(0));
+    const latSpan = MAP.latTop - MAP.latBottom;
+    const HOUR = 3_600_000;
+    const BEFORE = 0; // the pass strip starts at "now"
+    const SPAN = 22 * HOUR;
+
+    let W = 0, H = 0, dpr = 1;
+    let land: HTMLCanvasElement | null = null;
+    let colors: Record<string, string> = {};
+    let passes: { start: number; end: number; peak: number }[] = [];
+    let passesFrom = 0;
+
+    const x = (lon: number) => ((lon + 180) / 360) * W;
+    const y = (lat: number) => ((MAP.latTop - lat) / latSpan) * H;
+
+    function readColors() {
+      const cs = getComputedStyle(root);
+      for (const k of ['ink', 'ink-2', 'ink-3', 'rule', 'land', 'accent', 'bg']) colors[k] = cs.getPropertyValue(`--${k}`).trim();
+    }
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = rect.width;
+      H = rect.height;
+      canvas.width = Math.round(W * dpr);
+      canvas.height = Math.round(H * dpr);
+      land = null;
+      draw();
+    }
+
+    // Land dots and graticule, cached until size or theme changes.
+    function landLayer() {
+      const c = document.createElement('canvas');
+      c.width = canvas.width;
+      c.height = canvas.height;
+      const g = c.getContext('2d')!;
+      g.scale(dpr, dpr);
+      const cw = W / MAP.cols;
+      const rad = Math.max(0.6, cw * 0.26);
+      g.fillStyle = colors.land;
+      g.beginPath();
+      for (let row = 0; row < MAP.rows; row++) {
+        for (let col = 0; col < MAP.cols; col++) {
+          const i = row * MAP.cols + col;
+          if (!(bits[i >> 3] & (1 << (i & 7)))) continue;
+          const cx = (col + 0.5) * cw, cy = (row + 0.5) * (H / MAP.rows);
+          g.moveTo(cx + rad, cy);
+          g.arc(cx, cy, rad, 0, Math.PI * 2);
+        }
+      }
+      g.fill();
+      // Equator and the tropics, faint.
+      g.strokeStyle = colors.rule;
+      g.lineWidth = 1;
+      g.setLineDash([2, 4]);
+      for (const lat of [0, 23.44, -23.44]) {
+        g.beginPath();
+        g.moveTo(0, y(lat) + 0.5);
+        g.lineTo(W, y(lat) + 0.5);
+        g.stroke();
+      }
+      g.setLineDash([]);
+      return c;
+    }
+
+    // Polyline over lon/lat points, lifted at the antimeridian.
+    function path(points: { lat: number; lon: number }[]) {
+      ctx.beginPath();
+      let prev: number | null = null;
+      for (const p of points) {
+        if (prev === null || Math.abs(p.lon - prev) > 180) ctx.moveTo(x(p.lon), y(p.lat));
+        else ctx.lineTo(x(p.lon), y(p.lat));
+        prev = p.lon;
+      }
+    }
+
+    function footprint(alt: number) {
+      const ang = (footprintRadius(alt, st.mask) * Math.PI) / 180;
+      const la = (st.lat * Math.PI) / 180, lo = (st.lon * Math.PI) / 180;
+      const pts = [];
+      for (let b = 0; b <= 360; b += 6) {
+        const br = (b * Math.PI) / 180;
+        const lat2 = Math.asin(Math.sin(la) * Math.cos(ang) + Math.cos(la) * Math.sin(ang) * Math.cos(br));
+        const lon2 = lo + Math.atan2(Math.sin(br) * Math.sin(ang) * Math.cos(la), Math.cos(ang) - Math.sin(la) * Math.sin(lat2));
+        pts.push({ lat: (lat2 * 180) / Math.PI, lon: ((((lon2 * 180) / Math.PI + 540) % 360) - 180) });
+      }
+      return pts;
+    }
+
+    function draw(now = Date.now()) {
+      if (!W) return;
+      if (!land) land = landLayer();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(land, 0, 0);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const sat = propagate(el, now);
+      const elev = elevation(sat, st.lat, st.lon);
+      const aos = elev >= st.mask;
+
+      // Station visibility circle.
+      path(footprint(sat.alt));
+      ctx.closePath();
+      if (aos) {
+        ctx.fillStyle = colors.accent + '22';
+        ctx.fill();
+      }
+      ctx.strokeStyle = aos ? colors.accent : colors['ink-3'];
+      ctx.setLineDash([3, 3]);
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Track: the last 45 minutes solid, the next 45 dotted.
+      const past = [], next = [];
+      for (let m = -45; m <= 0; m += 0.5) past.push(propagate(el, now + m * 60_000));
+      for (let m = 0; m <= 45; m += 0.5) next.push(propagate(el, now + m * 60_000));
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = colors['ink-2'];
+      path(past);
+      ctx.stroke();
+      ctx.setLineDash([1.5, 4]);
+      ctx.strokeStyle = colors['ink-2'];
+      path(next);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Station marker.
+      const sx = x(st.lon), sy = y(st.lat);
+      ctx.fillStyle = colors.ink;
+      ctx.fillRect(sx - 3, sy - 3, 6, 6);
+      ctx.font = `10px ${getComputedStyle(root).getPropertyValue('--font-data')}`;
+      ctx.fillText(st.code, sx + 8, sy + 3.5);
+
+      // Link line while in view.
+      const px = x(sat.lon), py = y(sat.lat);
+      if (aos) {
+        ctx.strokeStyle = colors.accent;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(px, py);
+        ctx.stroke();
+      }
+
+      // Satellite.
+      ctx.fillStyle = colors.bg;
+      ctx.beginPath();
+      ctx.arc(px, py, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = colors.accent;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.fillStyle = colors.accent;
+      ctx.beginPath();
+      ctx.arc(px, py, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      readouts(now, sat, elev, aos);
+    }
+
+    function findPasses(from: number) {
+      const out: { start: number; end: number; peak: number }[] = [];
+      const step = 30_000;
+      const up = (t: number) => elevation(propagate(el, t), st.lat, st.lon) >= st.mask;
+      const edge = (a: number, b: number) => {
+        // Bisect to one second between a (state s) and b (state !s).
+        const s = up(a);
+        while (b - a > 1000) {
+          const m = (a + b) / 2;
+          if (up(m) === s) a = m;
+          else b = m;
+        }
+        return b;
+      };
+      let prevUp = up(from), start = prevUp ? from : 0, peak = 0;
+      for (let t = from + step; t <= from + SPAN + 2 * HOUR; t += step) {
+        const e = elevation(propagate(el, t), st.lat, st.lon);
+        const isUp = e >= st.mask;
+        if (isUp && !prevUp) { start = edge(t - step, t); peak = e; }
+        if (isUp) peak = Math.max(peak, e);
+        if (!isUp && prevUp) out.push({ start, end: edge(t - step, t), peak });
+        prevUp = isUp;
+      }
+      return out;
+    }
+
+    const clock = new Intl.DateTimeFormat('en-CA', { timeZone: st.tz, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+    function dur(ms: number) {
+      const s = Math.max(0, Math.round(ms / 1000));
+      const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+      return h ? `${h}h ${String(m).padStart(2, '0')}m` : `${m}m ${String(sec).padStart(2, '0')}s`;
+    }
+
+    function renderPasses(now: number) {
+      passesFrom = now - BEFORE;
+      passes = findPasses(passesFrom);
+      const pct = (t: number) => ((t - passesFrom) / SPAN) * 100;
+      r('passes').innerHTML = passes
+        .filter((p) => p.start < passesFrom + SPAN)
+        .map((p) => {
+          const left = Math.max(0, pct(p.start)), width = Math.max(0.15, Math.min(100, pct(p.end)) - left);
+          return `<span class="pass" data-start="${p.start}" data-end="${p.end}" style="left:${left}%;width:${width}%"></span>`;
+        })
+        .join('');
+      const ticks = [];
+      const first = Math.ceil(passesFrom / (4 * HOUR)) * 4 * HOUR;
+      for (let t = first; t < passesFrom + SPAN; t += 4 * HOUR) {
+        const p = pct(t);
+        if (p > 3 && p < 97) ticks.push(`<span style="left:${p}%">${clock.format(t)}</span>`);
+      }
+      r('axis').innerHTML = `<span style="left:0;transform:none">now</span>` + ticks.join('');
+    }
+
+    function readouts(now: number, sat: SubPoint, elev: number, aos: boolean) {
+      const ns = (v: number, p: string, n: string, d = 2) => `${Math.abs(v).toFixed(d)}° ${v >= 0 ? p : n}`;
+      r('lat').textContent = ns(sat.lat, 'N', 'S');
+      r('lon').textContent = ns(sat.lon, 'E', 'W');
+      r('alt').textContent = `${sat.alt.toFixed(0)} km`;
+      r('elev').textContent = `${elev.toFixed(1)}°`;
+      const state = r('state');
+      state.dataset.aos = String(aos);
+      r('stateText').textContent = aos ? `In view of ${st.code}` : 'Below horizon';
+
+      if (now - passesFrom > 5 * 60_000) renderPasses(now);
+      root.querySelectorAll<HTMLElement>('.pass').forEach((b) => {
+        b.classList.toggle('now', Number(b.dataset.start) <= now && now < Number(b.dataset.end));
+      });
+      const current = passes.find((p) => p.start <= now && now < p.end);
+      const upcoming = passes.find((p) => p.start > now);
+      if (current) {
+        r('nextLabel').textContent = 'Pass ends';
+        r('next').textContent = `${clock.format(current.end)} PT · in ${dur(current.end - now)} · peak ${current.peak.toFixed(0)}°`;
+      } else if (upcoming) {
+        r('nextLabel').textContent = 'Next pass';
+        r('next').textContent = `${clock.format(upcoming.start)} PT · in ${dur(upcoming.start - now)} · peak ${upcoming.peak.toFixed(0)}°`;
+      }
+    }
+
+    // Run only while the panel is on screen and the tab is visible.
+    let timer = 0, onScreen = true;
+    const tick = () => draw();
+    const schedule = () => {
+      clearInterval(timer);
+      if (onScreen && !document.hidden) {
+        draw();
+        timer = window.setInterval(tick, 1000);
+      }
+    };
+    new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; schedule(); }).observe(root);
+    document.addEventListener('visibilitychange', schedule);
+    new ResizeObserver(resize).observe(canvas);
+    const recolor = () => { readColors(); land = null; draw(); };
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', recolor);
+    document.addEventListener('themechange', recolor);
+
+    readColors();
+    renderPasses(Date.now());
+    resize();
+  }
+</script>
+
+<script>
+  // Station local time in the panel header.
+  const el = document.querySelector<HTMLElement>('[data-clock]');
+  if (el) {
+    const f = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Vancouver',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hourCycle: 'h23',
+    });
+    const tick = () => (el.textContent = f.format(Date.now()));
+    tick();
+    setInterval(tick, 1000);
+  }
+</script>

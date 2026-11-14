@@ -1,0 +1,138 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const missions = (await getCollection('missions')).sort((a, b) => a.data.order - b.data.order);
+  return missions.map((entry, i) => ({
+    params: { slug: entry.id },
+    props: { entry, next: missions[(i + 1) % missions.length] },
+  }));
+}
+
+const { entry, next } = Astro.props;
+const { data } = entry;
+const { Content } = await render(entry);
+---
+
+<Base title={data.title} description={data.summary} palette={data.palette}>
+  <article class="wrap mission">
+    <header class="m-head">
+      <a class="back data" href="/#missions">← All missions</a>
+      <p class="label"><span class="accent">{data.code}</span> · {data.dates}</p>
+      <h1>{data.title}</h1>
+      <p class="summary">{data.summary}</p>
+      {
+        data.links.length > 0 && (
+          <div class="actions">
+            {data.links.map((l, i) => (
+              <a class:list={['btn', { 'btn-primary': i === 0 }]} href={l.href} rel="noopener">
+                {l.label}
+                {l.note && <span class="muted note">{l.note}</span>}
+                <span class="arrow" aria-hidden="true">↗</span>
+              </a>
+            ))}
+          </div>
+        )
+      }
+    </header>
+
+    <dl class="facts">
+      <div><dt class="label">Role</dt><dd>{data.role}</dd></div>
+      <div><dt class="label">Team</dt><dd>{data.team}</dd></div>
+      <div>
+        <dt class="label">Result</dt>
+        <dd>
+          <span class:list={['data value', { todo: data.readout.todo }]}>{data.readout.value}</span>
+          {data.readout.label}
+        </dd>
+      </div>
+      <div><dt class="label">Stack</dt><dd class="data">{data.stack.join(' · ')}</dd></div>
+    </dl>
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    <a class="next" href={`/missions/${next.id}`}>
+      <span class="label">Next · {next.data.code}</span>
+      <span class="next-title">{next.data.title} →</span>
+    </a>
+  </article>
+</Base>
+
+<style>
+  .mission {
+    padding-top: clamp(28px, 5vw, 56px);
+  }
+  .back {
+    display: inline-block;
+    margin-bottom: clamp(32px, 6vw, 64px);
+    color: var(--ink-2);
+    text-decoration: none;
+  }
+  .m-head {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 900px;
+  }
+  .m-head .back {
+    align-self: flex-start;
+  }
+  h1 {
+    font-size: clamp(3rem, 9vw, 7rem);
+    letter-spacing: -0.045em;
+    line-height: 0.9;
+  }
+  .summary {
+    font-size: clamp(1.15rem, 2vw, 1.375rem);
+    color: var(--ink-2);
+    max-width: 52ch;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .note {
+    font-size: 0.6875rem;
+  }
+  .btn-primary .note {
+    color: inherit;
+    opacity: 0.75;
+  }
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    margin-block: clamp(40px, 6vw, 72px);
+    border-top: 1px solid var(--rule-strong);
+  }
+  .facts > div {
+    padding: 14px 20px 18px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .facts dd {
+    margin-top: 6px;
+  }
+  .value {
+    display: block;
+    font-size: 1.25rem;
+    color: var(--accent);
+  }
+  .next {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: clamp(64px, 10vw, 120px);
+    padding-top: 18px;
+    border-top: 1px solid var(--rule-strong);
+    text-decoration: none;
+  }
+  .next-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+  }
+</style>

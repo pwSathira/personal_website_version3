@@ -1,0 +1,390 @@
+{
+  "basics": {
+    "name": "Sathira Williams",
+    "email": "sathira.williams@gmail.com",
+    "location": "Surrey, British Columbia",
+    "links": [
+      {
+        "label": "Portfolio",
+        "url": "https://pwsathira.polywertz.com"
+      },
+      {
+        "label": "GitHub",
+        "url": "https://github.com/pwSathira"
+      },
+      {
+        "label": "LinkedIn",
+        "url": "https://linkedin.com/in/pwSathira"
+      }
+    ]
+  },
+  "experience": [
+    {
+      "company": "Verus Human Optimization",
+      "role_options": [
+        "Full-Stack Developer",
+        "Frontend Developer",
+        "Web Developer",
+        "Systems Support Specialist",
+        "IT / Web Systems Support"
+      ],
+      "dates": "Oct 2025 -- Present",
+      "location": "Vancouver, BC",
+      "bullets": [
+        "Maintain and optimize web infrastructure, diagnosing performance issues and system bottlenecks to guarantee high availability and minimal downtime.",
+        "Establish observability by monitoring web metrics and performance logs to proactively resolve application anomalies and improve data-driven decision workflows.",
+        "Autonomously implement frontend and backend improvements, leading to a 168% increase in site sessions and a 213% increase in unique visitors over a 30-day span.",
+        "Document code architecture, API modifications, and system runbooks for ongoing cross-functional team alignment.",
+        "Serve as primary technical contact for a small business client, gathering non-technical requirements, resolving reported issues, and delivering fixes against agreed timelines.",
+        "Administer a hosted web platform including content, configuration, and user-facing functionality, contributing to a 168% increase in sessions and 213% increase in unique visitors over 30 days.",
+        "Review analytics dashboards to detect abnormalities and usage trends, then recommend and implement usability and accessibility improvements."
+      ]
+    },
+    {
+      "company": "Ocean Spray",
+      "role_options": [
+        "Data Entry Clerk",
+        "Data Entry & Records Clerk",
+        "Operations Data Clerk"
+      ],
+      "dates": "Sep 2026 -- Nov 2026",
+      "location": "Richmond, BC",
+      "bullets": [
+        "Entered, verified, and maintained high-volume operational, inventory, and production records across internal databases and spreadsheets with high speed and accuracy.",
+        "Audited incoming logs and documentation against system records to identify discrepancies, correct data anomalies, and maintain strict data integrity for reporting.",
+        "Standardized digital filing and record-keeping workflows, collaborating with warehouse and operations staff to resolve missing or inconsistent documentation on tight deadlines.\"",
+        "Processed and verified about 50 bills of lading (BOLs) daily, cross-checking carrier, product, quantity, and destination details against orders and system records before release.",
+        "Scheduled and dispatched outbound loads across third-party carriers and the in-house fleet, booking pickups and updating shipment details through carrier portals.",
+        "Cut daily shipping delays by about 1 hour by sequencing truck loading and fixing paperwork issues before trucks arrived, so outbound shipments regularly finished ahead of schedule."
+      ]
+    },
+    {
+      "company": "Outlier AI",
+      "role_options": [
+        "Data Annotator (Freelance)",
+        "AI Data Annotator",
+        "AI Training Data Specialist (Freelance)"
+      ],
+      "dates": "May 2025 -- Oct 2025",
+      "location": "Remote",
+      "bullets": [
+        "Collaborated with AI development teams to enhance machine learning model accuracy through meticulous data labeling and annotation.",
+        "Ensured high-quality dataset integrity by identifying and correcting inconsistencies, leading to improved model performance.",
+        "Applied strong attention to detail and adherence to strict guidelines for complex annotation tasks, contributing to reliable AI training."
+      ]
+    },
+    {
+      "company": "Canadian Space Agency (Agence spatiale canadienne) Capstone Project",
+      "role_options": [
+        "Software Developer (Capstone)",
+        "Software Developer (Co-op)",
+        "Full-Stack Developer (Capstone)",
+        "Software Engineering Team Lead (Capstone)"
+      ],
+      "dates": "Sep 2024 -- Apr 2025",
+      "location": "York University (Toronto, ON — On-site)",
+      "bullets": [
+        "Co-developed a mission-critical, full-stack satellite scheduling platform using FastAPI (Python), Next.js, and PostgreSQL, lowering scheduling latency by 25% across multiple ground stations.",
+        "Engineered and optimized a full-stack satellite scheduling application in collaboration with the CSA, translating complex requirements into a system that balanced workloads across 5+ ground stations and reduced scheduling delays by 25%.",
+        "Built FastAPI RESTful APIs with PostgreSQL and Celestrak integration to manage real-time telemetry for multiple satellites, ensuring robust data handling.",
+        "Led the design of relational database structures and API endpoints, writing clear technical specifications and maintaining data integrity for concurrent scheduling workflows.",
+        "Debugged complex asynchronous networking errors and database deadlocks using structured logging and comprehensive integration test strategies.",
+        "Led Agile sprints using JIRA for ticket management, sprint planning, backlog grooming, and status tracking; coordinated peer code reviews and approval workflows via GitHub before changes were merged and deployed.",
+        "Built a satellite scheduling application coordinating workloads across 5+ ground stations, reducing scheduling delays by 25% and requiring careful change scheduling to avoid conflicting operations.",
+        "Produced technical documentation and handover material; presented progress and constraints to faculty and external CSA stakeholders in business-appropriate language."
+      ]
+    },
+    {
+      "company": "Chuck E Cheese",
+      "role_options": [
+        "Gameroom Attendant",
+        "Customer Service"
+      ],
+      "dates": "Sep 2021 -- Apr 2025",
+      "location": "Toronto, ON",
+      "bullets": [
+        "Provided front-line support in a fast-paced customer-facing environment, diagnosing and resolving hardware and software issues on networked arcade systems, POS terminals, and Windows workstations to restore service quickly and minimize business impact.",
+        "Triaged staff and guest-reported incidents by urgency and impact, resolving most on first contact and escalating complex or vendor-dependent failures with documented symptoms, steps taken, and business impact.",
+        "Tracked recurring faults across 100+ pieces of equipment, identified repeat failures, and recommended corrective action and replacement priorities to management instead of repeating short-term fixes.",
+        "Trained and mentored new employees on equipment operation and troubleshooting procedures, producing reference guidance that improved onboarding consistency; adapted schedule to cover evenings, weekends, and urgent failures."
+      ]
+    },
+    {
+      "company": "Dnipro Electric Inc.",
+      "role_options": [
+        "Software Engineer Intern",
+        "Web Developer Intern",
+        "Software Engineer (Contract)",
+        "Frontend Developer Intern",
+        "Fullstack Developer"
+      ],
+      "dates": "Jun 2023 -- Aug 2023",
+      "location": "Toronto, ON",
+      "bullets": [
+        "Optimized production React components and media rendering, successfully decreasing page-load latency by 30% and accelerating customer engagement by 15%+.",
+        "Configured and debugged micro-workflows handling real-time customer data capturing, ensuring zero packet loss during inbound database transmission.",
+        "Wrote extensive technical documentation detail-mapping UI/UX states, deployment configurations, and regional API pipelines.",
+        "Consulted and collaborated with business stakeholders to gather, analyze, and define requirements for the company website, ensuring alignment with business objectives.",
+        "Designed, developed, deployed, and handed over a responsive production website supporting customer inquiry intake and follow-up using Next.js, JavaScript, Netlify, and Formspree.",
+        "Tuned assets and page delivery for performance and stability, reducing average load time by 30% and increasing engagement metrics by 15%+."
+      ]
+    },
+    {
+      "company": "Mahamevnawa Buddhist Monastery",
+      "role_options": [
+        "Digital Publication Volunteer",
+        "Publishing & Translation Volunteer"
+      ],
+      "dates": "Sep 2016 -- Apr 2018",
+      "location": "Markham, ON (On-site)",
+      "bullets": [
+        "Assisted in translation of Buddhist texts (Sinhala to English) via Adobe InDesign.",
+        "Used Amazon's CreateSpace to publish books to the public.",
+        "Organized and handled bookstore purchases and inventory."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Green-Guard: FPGA & LSTM-Driven Smart Irrigation System",
+      "description": "EECS 3216 Digital Systems Engineering",
+      "bullets": [
+        "Built an LSTM time-series forecasting model in TensorFlow/Keras to predict plant health from historical moisture, humidity, and watering data, using MinMaxScaler normalization and a sliding-window preprocessing pipeline.",
+        "Implemented a randomized search optimization strategy over the trained model to recommend optimal environmental thresholds, translating model output into actionable system parameters.",
+        "Co-designed a dual-controller embedded architecture (Raspberry Pi Pico + DE10-Lite FPGA) for real-time sensor data acquisition, threshold-based actuation, and VGA visualization, integrating hardware, firmware, and ML components into a single closed-loop system.",
+        "Wrote Verilog in Intel Quartus Prime to decode sensor data sent over parallel GPIO, convert it to BCD, and render live humidity and moisture readings as 7-segment digits on a VGA monitor.",
+        "Programmed Raspberry Pi Pico firmware (Arduino C++) to read DHT11 and soil-moisture sensors and drive a water pump and fan through a relay and MOSFET.",
+        "Resolved voltage dips from high-current actuators with flyback diodes, decoupling capacitors, and a separate pump supply; added a buffered moisture threshold to handle sensor noise.",
+        "Demo: https://www.youtube.com/watch?v=Yn1OlFF0FPE"
+      ]
+    },
+    {
+      "name": "NyxOps: Open Source Incident & Records Management System",
+      "description": "https://github.com/nyxops | Tech: Keycloak, RBAC, Docker, PostgreSQL, Redis, MinIO, RabbitMQ, FastAPI",
+      "bullets": [
+        "Designed a modular, high-reliability safety dispatch and records platform including incident reporting, audit logging, and RBAC authentication.",
+        "Implemented user and application access management with Keycloak, including role-based access control, authentication flows, and audit logging for traceability of user actions.",
+        "Configured, deployed, and maintained a multi-service containerized Docker Compose environment orchestrating FastAPI server-side services, PostgreSQL, Redis caching, MinIO local object storage, Keycloak SSO, and RabbitMQ message queues to model high-throughput telemetry, complete with setup and troubleshooting documentation for contributors."
+      ]
+    },
+    {
+      "name": "Anki Audio Extractor — LLM Companion Pipeline",
+      "description": "https://github.com/pwSathira/Anki-Audio-Extractor | Tech: Electron, Node.js, Windows/macOS/Linux",
+      "bullets": [
+        "Designed, built, and supported a cross-platform open-source media-management desktop application and companion plugin handling offline local file parsing and API-based file transformation for 300+ active end users across Windows, macOS, and Linux.",
+        "Managed cross-platform environments, handling asynchronous local runtime errors and pipeline edge cases with structured fallback logic.",
+        "Handled inbound issue reports, reproduced and diagnosed installation and media-handling problems across operating systems, and published fixes and user-facing guidance that reduced repeat support requests."
+      ]
+    },
+    {
+      "name": "BidWise Auction System",
+      "description": "EECS 4413 course project | Tech: FastAPI, Python, Next.js, TypeScript, Docker Compose | Mar 2025 -- Apr 2025",
+      "bullets": [
+        "Built a full-stack auction platform with real-time bidding, user authentication and authorization, email notifications for auction events, and payment processing.",
+        "Containerized the FastAPI backend and Next.js frontend with Docker Compose, with OpenAPI docs and a seed endpoint that creates sample buyers, sellers, and auctions for testing."
+      ]
+    },
+    {
+      "name": "Blue-Link: Police Mobile Data Terminal",
+      "description": "https://github.com/pwSathira/blue-link | Tech: Java, Spring Boot, Microsoft Azure, Gradle, MigLayout | Jun 2023 -- Jan 2024",
+      "bullets": [
+        "Built a Java police mobile data terminal with cloud-based user authentication on Microsoft Azure, criminal-record processing, and police information management."
+      ]
+    },
+    {
+      "name": "Functional Requirements AI",
+      "description": "https://github.com/pwSathira/FunctionalReq_AI | Tech: Python, spaCy, Google Gemini Flash | Mar 2025",
+      "bullets": [
+        "Automated extraction and rephrasing of functional requirements from a natural-language system description, combining spaCy NLP preprocessing with Gemini Flash LLM prompting."
+      ]
+    },
+    {
+      "name": "Mushoku",
+      "description": "https://mushoku.vercel.app | Tech: Next.js, TypeScript, tRPC, Prisma, NextAuth.js, Zod, TailwindCSS, Radix UI, Vercel | May 2025 -- Jun 2025",
+      "bullets": [
+        "Built a full-stack language learning T3-stack web app with end-to-end typed tRPC APIs, Prisma ORM, NextAuth authentication, and Zod validation, deployed on Vercel."
+      ]
+    },
+    {
+      "name": "Personal Portfolio Website",
+      "description": "https://pwsathira.polywertz.com | Tech: Next.js, React, TailwindCSS, Radix UI, Vercel; earlier versions in Angular/TypeScript and vanilla JS | 2023 -- Present",
+      "bullets": [
+        "Designed and deployed three iterations of a personal portfolio and blog, from vanilla JavaScript (2023) to Angular/TypeScript on Netlify (2024) to Next.js and TailwindCSS on Vercel (2024 -- present)."
+      ]
+    },
+    {
+      "name": "Dnipro Electric Website v3",
+      "description": "https://de-electric-v3.pages.dev | Tech: Nuxt, Vue, Cloudflare Pages | May 2025",
+      "bullets": [
+        "Rebuilt the Dnipro Electric company website in Nuxt (Vue) and deployed it on Cloudflare Pages."
+      ]
+    },
+    {
+      "name": "Library Management System",
+      "description": "Java course project | 2023 -- 2024",
+      "bullets": [
+        "Built a Java desktop library system with separate admin and visitor accounts and item rental tracking."
+      ]
+    },
+    {
+      "name": "Global Progress Clocks: Hover Extension",
+      "description": "Tech: JavaScript, Foundry VTT | May 2026",
+      "bullets": [
+        "Extended an open-source Foundry VTT module (Blades in the Dark-style progress clocks) with hover functionality."
+      ]
+    },
+    {
+      "name": "Arduino Fan Control",
+      "description": "https://github.com/pwSathira/arduino-fan-control | Tech: Java, JavaFX, Arduino | May 2021",
+      "bullets": [
+        "Built a JavaFX desktop interface that reads a DHT11 temperature and humidity sensor on an Arduino Grove board and controls a fan."
+      ]
+    }
+  ],
+  "education": [
+    {
+      "school": "Georgia Institute of Technology",
+      "degree": "M.S. Computer Science",
+      "omittable": true,
+      "dates_options": [
+        "Jan 2026 -- Present",
+        "Expected 2028",
+        "In Progress"
+      ],
+      "location_options": [
+        "Remote",
+        "Online",
+        "Atlanta, GA"
+      ],
+      "details": "Specialization in Artificial Intelligence"
+    },
+    {
+      "school": "York University",
+      "degree": "B.Eng. Software Engineering",
+      "dates": "Sep 2020 -- Apr 2025",
+      "details": "Specialized Honours (Toronto, ON). Coursework: Operating Systems, Computer Networks, Database Management Systems, Systems Administration, Computer Security, Software Requirements and Testing, Digital Systems Engineering.\n"
+    }
+  ],
+  "skills": {
+    "AI & Machine Learning": [
+      "TensorFlow",
+      "Keras",
+      "LSTM/time-series forecasting",
+      "scikit-learn",
+      "pandas",
+      "numpy",
+      "Model evaluation & hyperparameter search",
+      "Data preprocessing",
+      "Data labeling & annotation"
+    ],
+    "Generative AI & LLM Tooling": [
+      "LLM prompting",
+      "RAG workflows",
+      "Structured data extraction",
+      "Embeddings-based pipelines"
+    ],
+    "Programming & Scripting": [
+      "Python",
+      "Java",
+      "JavaScript",
+      "TypeScript",
+      "SQL",
+      "Bash"
+    ],
+    "Frameworks, Libraries & Web": [
+      "FastAPI",
+      "Next.js",
+      "React",
+      "Node.js",
+      "Electron",
+      "Netlify",
+      "Formspree",
+      "Celestrak integration"
+    ],
+    "Databases, Caching & Messaging": [
+      "PostgreSQL",
+      "MySQL",
+      "MongoDB",
+      "Redis",
+      "MinIO (Object Storage)",
+      "RabbitMQ"
+    ],
+    "Systems, Cloud & Infrastructure": [
+      "Docker & Docker Compose",
+      "Git & GitHub",
+      "GitHub Actions & CI/CD",
+      "Azure",
+      "AWS",
+      "Linux administration",
+      "Windows 10/11 & Server administration",
+      "macOS",
+      "VM & container deployment"
+    ],
+    "IT Support & Service Desk": [
+      "Tier 1/2 end-user support",
+      "Incident & request intake",
+      "Ticket documentation & escalation",
+      "Recurring incident & root cause analysis",
+      "Knowledge base authoring",
+      "Staff training & onboarding",
+      "SLA-driven delivery"
+    ],
+    "Microsoft & Enterprise Tools": [
+      "Microsoft 365 (Outlook, Teams, SharePoint Online, OneDrive)",
+      "Microsoft Office",
+      "Entra ID & directory concepts",
+      "JIRA",
+      "Adobe InDesign",
+      "Amazon CreateSpace"
+    ],
+    "Endpoints, Hardware & Networking": [
+      "Desktop/laptop hardware",
+      "POS systems & networked arcade systems",
+      "Peripherals, displays & mobile devices",
+      "TCP/IP, DNS, DHCP",
+      "Remote troubleshooting",
+      "Raspberry Pi Pico & DE10-Lite FPGA"
+    ],
+    "Security & Access Management": [
+      "User & application access management",
+      "Role-Based Access Control (RBAC)",
+      "Keycloak identity/SSO",
+      "Authentication & audit logging",
+      "Account administration",
+      "Patch & vendor advisory awareness"
+    ],
+    "Additional (from GitHub)": [
+      "C",
+      "C++ (Arduino)",
+      "Verilog & Intel Quartus Prime",
+      "Spring Boot & Gradle",
+      "Vue / Nuxt",
+      "Angular",
+      "tRPC, Prisma, NextAuth.js, Zod",
+      "TailwindCSS",
+      "spaCy",
+      "Google Gemini API",
+      "JavaFX & Tkinter",
+      "Vercel & Cloudflare Pages"
+    ],
+    "Software Practices": [
+      "Unit & integration testing (JUnit, PyTest)",
+      "System observability & performance monitoring",
+      "Change review & approval workflows",
+      "Agile / Scrum & sprint planning",
+      "Technical writing & documentation",
+      "Software design"
+    ]
+  },
+  "certifications": [
+    "Google Cybersecurity Certificate",
+    "Google Network Security Certificate",
+    "Google Linux Certificate",
+    "Google SQL Certificate",
+    "ISC2 Candidate"
+  ],
+  "awards": [
+    "YorkU Engineering Competition 3rd Place"
+  ],
+  "publications": []
+}

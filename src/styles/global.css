@@ -1,0 +1,566 @@
+@import '@fontsource-variable/familjen-grotesk/wght.css';
+
+/* Commit Mono 400, subset to ASCII plus the symbols the site uses
+   (© ° · × é – — ← → ↗ ≈ ≤). Rebuild with pyftsubset if you add a symbol. */
+@font-face {
+  font-family: 'Commit Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/commit-mono-400-subset.woff2') format('woff2');
+}
+
+/* ---------- Tokens ----------
+   Night operations by default; a printed ops sheet in light mode.
+   One accent: international orange, the colour on flight hardware. */
+:root {
+  color-scheme: dark;
+  --bg: #0f0e0c;
+  --bg-raised: #161512;
+  --ink: #ece8df;
+  --ink-2: #a8a397;
+  --ink-3: #8a857a;
+  --rule: #2a2824;
+  --rule-strong: #3d3a34;
+  --accent: #ff5a14;
+  --accent-ink: #0f0e0c;
+  --land: #4a463f;
+  --ok: #4fbf6a;
+
+  --font-text: 'Familjen Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-data: 'Commit Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  --gutter: clamp(16px, 4vw, 48px);
+  --max: 1280px;
+  --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    color-scheme: light;
+    --bg: #f1eee6;
+    --bg-raised: #e8e4da;
+    --ink: #161512;
+    --ink-2: #4f4b43;
+    --ink-3: #6b665c;
+    --rule: #d3cec2;
+    --rule-strong: #b9b3a5;
+    --accent: #c03800;
+    --accent-ink: #f1eee6;
+    --land: #b9b3a5;
+    --ok: #1d7a35;
+  }
+}
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f1eee6;
+  --bg-raised: #e8e4da;
+  --ink: #161512;
+  --ink-2: #4f4b43;
+  --ink-3: #6b665c;
+  --rule: #d3cec2;
+  --rule-strong: #b9b3a5;
+  --accent: #c03800;
+  --accent-ink: #f1eee6;
+  --land: #b9b3a5;
+  --ok: #1d7a35;
+}
+
+/* Star-Sync's own palette (from ss-web), for its case study. */
+[data-palette='starsync'] {
+  color-scheme: light;
+  --bg: #f6f5f1;
+  --bg-raised: #ecEAe4;
+  --ink: #0e131b;
+  --ink-2: #4a505c;
+  --ink-3: #5e6470;
+  --rule: #d8d6ce;
+  --rule-strong: #b8b6ae;
+  --accent: #c5352c;
+  --accent-ink: #f6f5f1;
+  --land: #b8b6ae;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) [data-palette='starsync'] {
+    color-scheme: dark;
+    --bg: #0b0e13;
+    --bg-raised: #11151c;
+    --ink: #e9e7e1;
+    --ink-2: #b1b6bf;
+    --ink-3: #9aa0aa;
+    --rule: #262c36;
+    --rule-strong: #353d4a;
+    --accent: #e5534b;
+    --accent-ink: #0b0e13;
+    --land: #353d4a;
+  }
+}
+:root[data-theme='dark'] [data-palette='starsync'] {
+  color-scheme: dark;
+  --bg: #0b0e13;
+  --bg-raised: #11151c;
+  --ink: #e9e7e1;
+  --ink-2: #b1b6bf;
+  --ink-3: #9aa0aa;
+  --rule: #262c36;
+  --rule-strong: #353d4a;
+  --accent: #e5534b;
+  --accent-ink: #0b0e13;
+  --land: #353d4a;
+}
+
+/* Anki's own palette (desktop canvas greys, primary-button blue), for its case study. */
+[data-palette='anki'] {
+  color-scheme: light;
+  --bg: #f5f5f5;
+  --bg-raised: #ffffff;
+  --ink: #1a1a1a;
+  --ink-2: #4d4d4d;
+  --ink-3: #666666;
+  --rule: #e2e2e2;
+  --rule-strong: #c4c4c4;
+  --accent: #2563eb;
+  --accent-ink: #ffffff;
+  --land: #c4c4c4;
+  --ok: #15803d;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) [data-palette='anki'] {
+    color-scheme: dark;
+    --bg: #2c2c2c;
+    --bg-raised: #363636;
+    --ink: #fcfcfc;
+    --ink-2: #c2c2c2;
+    --ink-3: #a3a3a3;
+    --rule: #3d3d3d;
+    --rule-strong: #525252;
+    --accent: #60a5fa;
+    --accent-ink: #1a1a1a;
+    --land: #525252;
+    --ok: #4ade80;
+  }
+}
+:root[data-theme='dark'] [data-palette='anki'] {
+  color-scheme: dark;
+  --bg: #2c2c2c;
+  --bg-raised: #363636;
+  --ink: #fcfcfc;
+  --ink-2: #c2c2c2;
+  --ink-3: #a3a3a3;
+  --rule: #3d3d3d;
+  --rule-strong: #525252;
+  --accent: #60a5fa;
+  --accent-ink: #1a1a1a;
+  --land: #525252;
+  --ok: #4ade80;
+}
+
+/* Blue-Link's own palette (from its Swing UI): Solarized base03 window,
+   base2 text, and the #379B8C teal of its login panel and sidebar. */
+[data-palette='bluelink'] {
+  color-scheme: dark;
+  --bg: #002b36;
+  --bg-raised: #073642;
+  --ink: #eee8d5;
+  --ink-2: #93a1a1;
+  --ink-3: #839496;
+  --rule: #0e4452;
+  --rule-strong: #1d5a68;
+  --accent: #4fb8a7;
+  --accent-ink: #002b36;
+  --land: #1d5a68;
+  --ok: #859900;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) [data-palette='bluelink'] {
+    color-scheme: light;
+    --bg: #fdf6e3;
+    --bg-raised: #eee8d5;
+    --ink: #002b36;
+    --ink-2: #3b5560;
+    --ink-3: #586e75;
+    --rule: #e4dcc6;
+    --rule-strong: #c9c0a8;
+    --accent: #296c5f;
+    --accent-ink: #fdf6e3;
+    --land: #c9c0a8;
+    --ok: #5f6e00;
+  }
+}
+:root[data-theme='light'] [data-palette='bluelink'] {
+  color-scheme: light;
+  --bg: #fdf6e3;
+  --bg-raised: #eee8d5;
+  --ink: #002b36;
+  --ink-2: #3b5560;
+  --ink-3: #586e75;
+  --rule: #e4dcc6;
+  --rule-strong: #c9c0a8;
+  --accent: #296c5f;
+  --accent-ink: #fdf6e3;
+  --land: #c9c0a8;
+  --ok: #5f6e00;
+}
+
+/* ---------- Base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: 72px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  font-feature-settings: 'ss01';
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+img,
+svg,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+a:hover {
+  color: var(--accent);
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 1px;
+}
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+h1,
+h2,
+h3,
+p,
+ul,
+ol,
+dl,
+dd,
+figure {
+  margin: 0;
+}
+h1,
+h2,
+h3 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+p {
+  text-wrap: pretty;
+}
+
+/* ---------- Layout ---------- */
+.wrap {
+  width: 100%;
+  max-width: var(--max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.section {
+  padding-block: clamp(64px, 10vw, 128px) 0;
+}
+/* Section head: a mono index on the left, the title on the rule. */
+.section-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  position: relative;
+  padding-top: 15px;
+  margin-bottom: clamp(28px, 4vw, 48px);
+}
+/* The head's rule is drawn by a pseudo-element so it can extend from the left. */
+.section-head::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: var(--rule-strong);
+  transform: scaleX(var(--rule-x, 1));
+  transform-origin: left;
+}
+.section-head h2 {
+  font-size: clamp(1.9rem, 4.2vw, 3.25rem);
+}
+.section-head p {
+  color: var(--ink-2);
+  max-width: 52ch;
+}
+@media (min-width: 860px) {
+  .section-head {
+    grid-template-columns: 200px minmax(0, 1fr) minmax(0, 0.9fr);
+    align-items: start;
+    gap: 24px;
+  }
+  .section-head p {
+    padding-top: 0.4em;
+  }
+}
+
+/* ---------- Data type ---------- */
+.data {
+  font-family: var(--font-data);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+}
+.label {
+  font-family: var(--font-data);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+}
+.muted {
+  color: var(--ink-2);
+}
+.accent {
+  color: var(--accent);
+}
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 44px;
+  padding-inline: 18px;
+  border: 1px solid var(--rule-strong);
+  font-family: var(--font-data);
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  color: var(--ink);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s,
+    color 0.2s;
+}
+.btn:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.btn-primary:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+}
+.btn .arrow {
+  transition: transform 0.25s var(--ease);
+}
+.btn:hover .arrow {
+  transform: translate(2px, -2px);
+}
+
+/* ---------- Case study prose ---------- */
+.prose {
+  font-size: 1.125rem;
+  line-height: 1.65;
+}
+.prose > * {
+  max-width: 68ch;
+}
+.prose > * + * {
+  margin-top: 1.1em;
+}
+.prose h2 {
+  font-size: 1.75rem;
+  margin-top: 2.4em;
+  padding-top: 14px;
+  border-top: 1px solid var(--rule);
+}
+.prose h3 {
+  font-size: 1.25rem;
+  margin-top: 1.8em;
+}
+.prose ul,
+.prose ol {
+  padding-left: 1.2em;
+}
+.prose li + li {
+  margin-top: 0.4em;
+}
+.prose li::marker {
+  color: var(--ink-3);
+}
+.prose code {
+  font-family: var(--font-data);
+  font-size: 0.85em;
+  background: var(--bg-raised);
+  padding: 0.1em 0.35em;
+}
+.prose strong {
+  font-weight: 650;
+}
+.prose table {
+  width: 100%;
+  /* Same measure as the paragraphs: 68ch of 1.125rem text = 42.5rem. */
+  max-width: 42.5rem;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+.prose th,
+.prose td {
+  text-align: left;
+  padding: 8px 12px 8px 0;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+.prose th {
+  font-family: var(--font-data);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  font-weight: 400;
+}
+.prose td.num,
+.prose th.num {
+  text-align: right;
+  white-space: nowrap;
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
+  /* Shrink number columns to their content so the label column takes the rest. */
+  width: 1%;
+  padding-left: clamp(16px, 4vw, 40px);
+}
+.prose tr > :last-child {
+  padding-right: 0;
+}
+.prose > figure {
+  /* Same measure as the paragraphs; figures use smaller type, so ch would undershoot. */
+  max-width: 42.5rem;
+  margin-block: 2em 2.4em;
+}
+.prose > .wide {
+  max-width: none;
+  margin-block: 2em 2.4em;
+}
+.prose figcaption {
+  margin-top: 10px;
+  font-family: var(--font-data);
+  font-size: 0.75rem;
+  color: var(--ink-3);
+}
+.todo {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  outline: 1px dashed var(--accent);
+  padding: 0 0.3em;
+}
+
+/* ---------- Entrance motion ----------
+   Starting states for src/scripts/motion.ts. They apply only under html.motion,
+   which an inline script sets when reduced motion is off, so the page is fully
+   visible without JavaScript. Keep these selectors in step with motion.ts. */
+html.motion {
+  & .hero .side > *,
+  & .gt-head > span,
+  & .gt-readouts > div,
+  & .gt-passes,
+  & .gt figcaption,
+  & .section-head .label,
+  & .section-head h2,
+  & .section-head p,
+  & #missions .row,
+  & #missions .row .code,
+  & #pass-log .axis span,
+  & #pass-log .lane-name,
+  & #pass-log .bar-label,
+  & #pass-log .now span,
+  & #pass-log .jobs > li,
+  & #pass-log .aside > *,
+  & #spec .spec > div,
+  & #spec .spec li,
+  & #contact .channel,
+  & #contact .links li,
+  & .m-head > *,
+  & .facts > div,
+  & figure.waffle rect,
+  & .prose > figure:not(.stats):not(.tl):not(.waffle),
+  & .prose > .wide {
+    opacity: 0;
+  }
+  & .hero .hero-mark circle {
+    opacity: 0;
+  }
+  & .hero h1 .line > span {
+    transform: translateY(105%);
+  }
+  & .hero .gt {
+    clip-path: inset(0 0 100% 0);
+  }
+  & .hero .hero-mark circle {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  & #pass-log .bar,
+  & figure.stats .meter span,
+  & figure.tl .row:not(.axis) .track > span {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  & #pass-log .now {
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  & .section-head {
+    --rule-x: 0;
+  }
+}
+
+/* ---------- Page transitions (native, no JS) ---------- */
+@view-transition {
+  navigation: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

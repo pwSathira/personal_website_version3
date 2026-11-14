@@ -1,0 +1,138 @@
+---
+// What's inside an .apkg and what the extractor does with it, using an example deck.
+interface Entry {
+  id: string;
+  name: string;
+}
+interface Props {
+  entries: Entry[];
+  caption?: string;
+}
+const { entries, caption } = Astro.props;
+const audio = /\.(mp3|ogg|wav|m4a)$/i;
+---
+
+<figure class="apkg wide">
+  <div class="cols">
+    <section class="col">
+      <p class="label">01 · deck.apkg <span class="muted">(a zip)</span></p>
+      <ul class="files data">
+        <li class="meta">collection.anki21</li>
+        <li class="meta">media</li>
+        {entries.map((e) => <li>{e.id}</li>)}
+      </ul>
+    </section>
+
+    <span class="arrow" aria-hidden="true"></span>
+
+    <section class="col">
+      <p class="label">02 · the media map</p>
+      <pre class="data map"><code>{'{\n'}{entries.map((e, i) => `  "${e.id}": "${e.name}"${i < entries.length - 1 ? ',' : ''}\n`).join('')}{'}'}</code></pre>
+    </section>
+
+    <span class="arrow" aria-hidden="true"></span>
+
+    <section class="col">
+      <p class="label">03 · output folder</p>
+      <ul class="files data">
+        {
+          entries.map((e) =>
+            audio.test(e.name) ? (
+              <li class="out">{e.name}</li>
+            ) : (
+              <li class="skip">
+                <s>{e.name}</s> <span class="why">not audio</span>
+              </li>
+            ),
+          )
+        }
+      </ul>
+    </section>
+  </div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .cols {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    border: 1px solid var(--rule-strong);
+  }
+  .col {
+    padding: 14px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .files {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 4px;
+    font-size: 0.8125rem;
+  }
+  .files li {
+    margin: 0;
+    padding: 4px 8px;
+    background: var(--bg-raised);
+    border-left: 2px solid var(--rule-strong);
+  }
+  .files .meta {
+    color: var(--ink-3);
+  }
+  .files .out {
+    border-left-color: var(--accent);
+  }
+  .files .skip {
+    color: var(--ink-3);
+    border-left-style: dashed;
+  }
+  .why {
+    float: right;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .map {
+    margin: 0;
+    padding: 10px 12px;
+    background: var(--bg-raised);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  /* Down arrows between stacked columns; right arrows when side by side. */
+  .arrow {
+    position: relative;
+    height: 22px;
+    border-top: 1px solid var(--rule);
+  }
+  .arrow::after {
+    content: '';
+    position: absolute;
+    left: 24px;
+    top: 2px;
+    width: 10px;
+    height: 10px;
+    border-right: 1px solid var(--accent);
+    border-bottom: 1px solid var(--accent);
+    transform: rotate(45deg);
+  }
+  @media (min-width: 860px) {
+    .cols {
+      grid-template-columns: minmax(0, 0.8fr) 28px minmax(0, 1.2fr) 28px minmax(0, 1fr);
+    }
+    .arrow {
+      height: auto;
+      border-top: 0;
+      border-left: 1px solid var(--rule);
+      border-right: 1px solid var(--rule);
+    }
+    .arrow::after {
+      left: 6px;
+      top: 50%;
+      transform: translateY(-50%) rotate(-45deg);
+    }
+  }
+</style>

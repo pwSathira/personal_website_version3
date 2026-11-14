@@ -1,0 +1,4 @@
+# Cloudflare Pages. The old blog is gone; its one technical post became a case study.
+/blog/anki_deck_extractor  /missions/anki-audio-extractor  301
+/blog/*                    /                               301
+/blog                      /                               301
