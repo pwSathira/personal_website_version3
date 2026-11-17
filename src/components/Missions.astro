@@ -25,7 +25,7 @@ const missions = (await getCollection('missions')).sort((a, b) => a.data.order -
         return (
           <li class:list={['row', { featured: id === 'star-sync' }]} data-palette={data.palette}>
             <a class:list={['preview', id]} href={`/missions/${id}`} tabindex="-1" aria-hidden="true">
-              {id === 'star-sync' ? <Image src={schedule} alt="" widths={[640, 1200]} sizes="(min-width: 1280px) 695px, (min-width: 960px) 58vw, 100vw" /> : id === 'blue-link' ? <Image src={login} alt="" widths={[480, 800]} sizes="(min-width: 960px) 40vw, 100vw" /> : (
+              {id === 'star-sync' ? <Image src={schedule} alt="" loading="eager" decoding="async" widths={[640, 1200]} sizes="(min-width: 1280px) 695px, (min-width: 960px) 58vw, 100vw" /> : id === 'blue-link' ? <Image src={login} alt="" loading="lazy" decoding="async" widths={[480, 800]} sizes="(min-width: 960px) 40vw, 100vw" /> : (
                 <div class="audio-preview">
                   <span class="data">.apkg → audio files</span>
                   <div class="wave" aria-hidden="true">{[16,32,22,48,66,38,80,54,30,68,90,52,36,60,28,44,18].map(h => <i style={`height:${h}px`} />)}</div>
@@ -67,6 +67,10 @@ const missions = (await getCollection('missions')).sort((a, b) => a.data.order -
   </ol>
   <details class="live-work">
     <summary><span><span class="label">Live engineering demo</span><strong>A satellite over Vancouver. Computed in your browser.</strong></span><span class="disclosure" aria-hidden="true">+</span></summary>
+    <script is:inline>
+      // Set the initial state before rendering the contents; subsequent toggles stay user-controlled.
+      document.currentScript.closest('details').open = matchMedia('(min-width: 960px)').matches;
+    </script>
     <div class="live-content">
     <div class="live-intro">
       <div><span class="label">In orbit · A working example</span><h3>The engineering behind the interface.</h3></div>

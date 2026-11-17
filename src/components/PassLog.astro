@@ -30,6 +30,10 @@ const other = all.filter((p) => p.lane === 'other');
   </div>
 
   <details class="career-timeline"><summary class="data">View career timeline <span aria-hidden="true">+</span></summary>
+    <script is:inline>
+      // Set the initial state before rendering the contents; subsequent toggles stay user-controlled.
+      document.currentScript.closest('details').open = matchMedia('(min-width: 960px)').matches;
+    </script>
   <div class="timeline" aria-hidden="true">
     <div class="axis data">
       {years.map((y) => <span style={`left:${pct(Date.UTC(y, 0, 1))}%`}>{y}</span>)}
@@ -127,7 +131,8 @@ const other = all.filter((p) => p.lane === 'other');
 <style>
   .career-timeline { margin-bottom: 32px; border-bottom: 1px solid var(--rule); }
   .career-timeline > summary { padding: 12px 0; cursor: pointer; color: var(--ink-2); }
-  .career-timeline > summary span { float: right; color: var(--accent); }
+  .career-timeline > summary span { float: right; color: var(--accent); transition: transform .25s; }
+  .career-timeline[open] > summary span { transform: rotate(45deg); }
   .other-experience { margin-top: 28px; }
   .other-experience summary { cursor: pointer; padding-block: 12px; }
   .highlight { margin-top: 16px; padding-left: 16px; border-left: 2px solid var(--accent); color: var(--ink); }

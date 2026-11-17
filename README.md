@@ -6,7 +6,7 @@ My portfolio, built with Astro and TypeScript. It has my projects, work experien
 
 ## Running it locally
 
-You'll need Node.js 22.18 or newer.
+You'll need Node.js 26 LTS (see `.node-version`).
 
 ```sh
 npm ci
@@ -51,3 +51,8 @@ The site builds to plain files in `dist/`. For Vercel, the build and routing set
 The old blog URLs redirect to the homepage or the relevant case study.
 
 The weekly TLE rebuild workflow runs on Mondays at 10:17 UTC to keep the satellite data fresh. You can also run it manually from GitHub Actions. In Vercel, create a deploy hook under the project's Settings → Git → Deploy Hooks for the `master` branch, then save its URL as the `DEPLOY_HOOK_URL` repository secret in GitHub. The hook requests a deployment; check Vercel for the build result.
+
+
+Vercel Web Analytics is included through the shared Astro layout. Enable Web Analytics in the Vercel project dashboard; page views are collected after deployment.
+
+Shared links use `public/social-card.png` for Twitter/X and Open Graph previews. After changing the card design in `scripts/build-social-card.ts`, run `npm run build:social` and commit the generated image.
