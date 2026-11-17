@@ -1,0 +1,95 @@
+---
+// The folder an export leaves behind, drawn as a file tree with a note beside each part.
+interface Item {
+  name: string;
+  /** Nesting level, 0 for the output folder itself. */
+  depth: number;
+  kind: 'folder' | 'audio' | 'list' | 'sheet';
+  note?: string;
+}
+interface Props {
+  items: Item[];
+  caption?: string;
+}
+const { items, caption } = Astro.props;
+---
+
+<figure class="tree wide">
+  <ul>
+    {
+      items.map((it) => (
+        <li class={it.kind}>
+          <span class="name data" style={`--d:${it.depth}`}>
+            <svg class="ico" viewBox="0 0 18 14" aria-hidden="true">
+              {it.kind === 'folder' && <path d="M1 3h6l2 2h8v8H1z" />}
+              {it.kind === 'audio' && <path d="M2 6v2M5 4v6M8 1v12M11 5v4M14 3v8M17 6v2" />}
+              {it.kind === 'list' && <path d="M1 3l3 2-3 2zM7 5h10M1 11h16" />}
+              {it.kind === 'sheet' && <path d="M1 1h16v12H1zM1 5h16M1 9h16M7 1v12" />}
+            </svg>
+            {it.name}
+          </span>
+          {it.note && <span class="note">{it.note}</span>}
+        </li>
+      ))
+    }
+  </ul>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  ul {
+    list-style: none;
+    padding: 6px 0;
+    margin: 0;
+    border: 1px solid var(--rule-strong);
+    background: var(--bg-raised);
+  }
+  li {
+    display: grid;
+    gap: 2px 24px;
+    margin: 0;
+    padding: 6px 16px;
+  }
+  .name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-left: calc(var(--d) * 22px);
+    font-size: 0.875rem;
+    overflow-wrap: anywhere;
+  }
+  .folder .name {
+    color: var(--ink-2);
+  }
+  .ico {
+    flex: none;
+    width: 18px;
+    height: 14px;
+    fill: none;
+    stroke: var(--ink-3);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .audio .ico,
+  .list .ico,
+  .sheet .ico {
+    stroke: var(--accent);
+  }
+  .note {
+    padding-left: calc(var(--d, 0) * 22px + 28px);
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: var(--ink-2);
+  }
+  @media (min-width: 760px) {
+    li {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: center;
+    }
+    .note {
+      padding-left: 14px;
+      border-left: 2px solid var(--accent);
+    }
+  }
+</style>

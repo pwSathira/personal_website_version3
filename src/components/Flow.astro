@@ -8,17 +8,19 @@ interface Step {
 interface Props {
   steps: Step[];
   caption?: string;
+  /** Steps are alternatives, not a sequence: number them but draw no arrows. */
+  parallel?: boolean;
 }
-const { steps, caption } = Astro.props;
+const { steps, caption, parallel = false } = Astro.props;
 ---
 
-<figure class="flow wide">
+<figure class:list={['flow', 'wide', { parallel }]}>
   <ol style={`--n:${steps.length}`}>
     {
       steps.map((s, i) => (
         <li>
           <span class="k data">
-            {String(i + 1).padStart(2, '0')} · {s.k}
+            {[String(i + 1).padStart(2, '0'), s.k].filter((p, j, a) => p && a.indexOf(p) === j).join(' · ')}
           </span>
           <strong>{s.title}</strong>
           <span class="body">{s.body}</span>
@@ -64,6 +66,9 @@ const { steps, caption } = Astro.props;
     border-bottom: 1px solid var(--accent);
     transform: rotate(45deg);
     z-index: 1;
+  }
+  .flow.parallel li::after {
+    display: none;
   }
   .k {
     color: var(--accent);
