@@ -1,17 +1,21 @@
-# Rebuilds the site every night so the hero ground track uses a fresh TLE.
+# Rebuilds the site every week so the hero ground track uses a fresh TLE.
 # Set the DEPLOY_HOOK_URL secret to a Cloudflare Pages or Vercel deploy hook.
-name: Nightly rebuild
+name: Weekly TLE rebuild
 on:
   schedule:
-    - cron: '17 10 * * *' # 02:17 / 03:17 Vancouver time
+    - cron: '17 10 * * 1' # Mondays at 10:17 UTC
   workflow_dispatch:
+permissions:
+  contents: read
 jobs:
   rebuild:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
     steps:
       - name: Trigger deploy hook
         env:
           DEPLOY_HOOK_URL: ${{ secrets.DEPLOY_HOOK_URL }}
         run: |
-          if [ -z "$DEPLOY_HOOK_URL" ]; then echo "DEPLOY_HOOK_URL not set"; exit 1; fi
-          curl -fsS -X POST "$DEPLOY_HOOK_URL"
+          if [ -z "$DEPLOY_HOOK_URL" ]; then echo "::error::Set the DEPLOY_HOOK_URL repository secret to a deploy hook for the master branch."; exit 1; fi
+          curl --fail --silent --show-error --connect-timeout 10 --max-time 60 \
+            --output /dev/null --request POST "$DEPLOY_HOOK_URL"

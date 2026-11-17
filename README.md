@@ -50,4 +50,4 @@ The site builds to plain files in `dist/`. For Vercel, the build and routing set
 
 The old blog URLs redirect to the homepage or the relevant case study.
 
-There's an optional nightly rebuild workflow to keep the satellite data fresh. It needs a hosting-provider deploy hook saved as the `DEPLOY_HOOK_URL` GitHub secret.
+The weekly TLE rebuild workflow runs on Mondays at 10:17 UTC to keep the satellite data fresh. You can also run it manually from GitHub Actions. In Vercel, create a deploy hook under the project's Settings → Git → Deploy Hooks for the `master` branch, then save its URL as the `DEPLOY_HOOK_URL` repository secret in GitHub. The hook requests a deployment; check Vercel for the build result.
