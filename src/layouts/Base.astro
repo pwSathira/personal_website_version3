@@ -1,7 +1,9 @@
 ---
 import '../styles/global.css';
+import Analytics from '@vercel/analytics/astro';
 import { basics, BUILD_TIME } from '../lib/cv';
 import Logo from '../components/Logo.astro';
+import SocialMeta from '../components/SocialMeta.astro';
 import tle from '../data/tle.json';
 import monoUrl from '../fonts/commit-mono-400-subset.woff2?url';
 import textUrl from '@fontsource-variable/familjen-grotesk/files/familjen-grotesk-latin-wght-normal.woff2?url';
@@ -51,12 +53,7 @@ const built = BUILD_TIME.toISOString().slice(0, 10);
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="theme-color" content="#0f0e0c" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#f1eee6" media="(prefers-color-scheme: light)" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content={pageTitle} />
-    <meta property="og:description" content={desc} />
-    <meta property="og:url" content={canonical} />
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:site" content="@polywertz" />
+    <SocialMeta title={pageTitle} description={desc} />
     <script is:inline>
       (() => {
         const d = document.documentElement;
@@ -72,6 +69,7 @@ const built = BUILD_TIME.toISOString().slice(0, 10);
         }
       })();
     </script>
+    <Analytics />
     {isHome && <script type="application/ld+json" set:html={JSON.stringify(person)} />}
   </head>
   <body data-palette={palette}>

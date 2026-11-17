@@ -1,5 +1,7 @@
 ---
 import '../styles/global.css';
+import Analytics from '@vercel/analytics/astro';
+import SocialMeta from '../components/SocialMeta.astro';
 import { basics, passes, formatRange } from '../lib/cv';
 import { experienceSummaries, skills } from '../data/site';
 const work = passes().filter(p => p.lane === 'software');
@@ -12,6 +14,9 @@ const education = passes().filter(p => p.lane === 'study');
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Sathira Williams · Résumé</title>
     <meta name="description" content="Sathira Williams — full-stack developer. Experience, selected projects, education, and technical skills." />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <SocialMeta title="Sathira Williams · Résumé" description="Sathira Williams — full-stack developer. Experience, selected projects, education, and technical skills." />
+    <Analytics />
   </head>
   <body>
     <nav class="screen-actions" aria-label="Résumé actions"><a href="/">← Portfolio</a><a href="/Sathira_Williams_Resume.pdf" download>Download PDF ↓</a><button type="button" onclick="window.print()">Print résumé</button></nav>
