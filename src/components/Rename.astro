@@ -1,0 +1,213 @@
+---
+// How a naming pattern turns Anki's media names into readable ones, one note per row.
+interface Field {
+  name: string;
+  /** Empty string draws the field as empty. */
+  value: string;
+}
+interface Row {
+  from: string;
+  fields: Field[];
+  to: string;
+  /** Short reason shown under the result, e.g. why a name was kept. */
+  note?: string;
+  kept?: boolean;
+}
+interface Props {
+  pattern: string;
+  rows: Row[];
+  caption?: string;
+}
+const { pattern, rows, caption } = Astro.props;
+---
+
+<figure class="rename wide">
+  <div class="box">
+    <p class="head">
+      <span class="label">Pattern</span>
+      <code class="data pattern">{pattern}</code>
+    </p>
+    <p class="cols label" aria-hidden="true">
+      <span>In Anki</span>
+      <span>Note fields</span>
+      <span>Exported as</span>
+    </p>
+    <ol>
+      {
+        rows.map((r) => (
+          <li>
+            <span class="cell from">
+              <span class="label">In Anki</span>
+              <span class="file data">
+                <s>{r.from}</s>
+              </span>
+            </span>
+            <span class="cell note">
+              <span class="label">Note fields</span>
+              <span class="chips">
+                {r.fields.map((f) => (
+                  <span class:list={['chip', { empty: !f.value }]}>
+                    <span class="fname data">{f.name}</span>
+                    <span class="fval">{f.value || 'empty'}</span>
+                  </span>
+                ))}
+              </span>
+            </span>
+            <span class="cell to">
+              <span class="label">Exported as</span>
+              <span class:list={['file', 'out', 'data', { kept: r.kept }]}>
+                <svg class="wave" viewBox="0 0 18 12" aria-hidden="true">
+                  <path d="M1 5v2M4 3v6M7 1v10M10 4v4M13 2v8M16 5v2" />
+                </svg>
+                {r.to}
+              </span>
+              {r.note && <span class="why">{r.note}</span>}
+            </span>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .box {
+    border: 1px solid var(--rule-strong);
+  }
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    margin: 0;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--rule-strong);
+    background: var(--bg-raised);
+  }
+  .pattern {
+    padding: 3px 10px;
+    font-size: 0.9375rem;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    background: none;
+  }
+  ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  li {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 14px 16px 16px;
+    border-bottom: 1px solid var(--rule);
+  }
+  li:last-child {
+    border-bottom: 0;
+  }
+  .cell {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+  .file {
+    font-size: 0.8125rem;
+    overflow-wrap: anywhere;
+  }
+  .from .file {
+    color: var(--ink-3);
+  }
+  .out {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    align-self: flex-start;
+    padding: 5px 10px;
+    font-size: 0.9375rem;
+    background: var(--bg-raised);
+    border-left: 2px solid var(--accent);
+  }
+  .out.kept {
+    color: var(--ink-3);
+    border-left: 2px dashed var(--ink-3);
+  }
+  .wave {
+    flex: none;
+    width: 18px;
+    height: 12px;
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+  }
+  .kept .wave {
+    stroke: var(--ink-3);
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 3px 8px;
+    border: 1px solid var(--rule-strong);
+    font-size: 0.9375rem;
+    line-height: 1.4;
+  }
+  .fname {
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+  }
+  .chip.empty {
+    border-style: dashed;
+  }
+  .chip.empty .fval {
+    color: var(--ink-3);
+    font-style: italic;
+  }
+  .why {
+    font-size: 0.8125rem;
+    color: var(--ink-3);
+  }
+  .cols {
+    display: none;
+  }
+  @media (min-width: 860px) {
+    .cols,
+    li {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 36px;
+      align-items: center;
+    }
+    .cols {
+      margin: 0;
+      padding: 12px 16px 0;
+    }
+    /* The header row carries the column headings. */
+    .cell > .label {
+      display: none;
+    }
+    /* Chevron between columns. */
+    .cell:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: -22px;
+      top: 50%;
+      width: 8px;
+      height: 8px;
+      border-right: 1px solid var(--accent);
+      border-bottom: 1px solid var(--accent);
+      transform: translateY(-50%) rotate(-45deg);
+    }
+  }
+</style>

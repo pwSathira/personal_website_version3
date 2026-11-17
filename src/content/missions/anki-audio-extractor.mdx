@@ -16,8 +16,9 @@ palette: anki
 
 import Flow from '../../components/Flow.astro';
 import ApkgAnatomy from '../../components/ApkgAnatomy.astro';
-import Stats from '../../components/Stats.astro';
 import Support from '../../components/Support.astro';
+import Rename from '../../components/Rename.astro';
+import ExportTree from '../../components/ExportTree.astro';
 
 I was building Mushoku, a site that teaches hiragana and katakana side by side the way English teaches lower and upper case, and it needed a native speaker saying every character. Plenty of Anki decks already had those recordings. Nothing would get them out.
 
@@ -48,53 +49,80 @@ That logic fit in one function. Getting it to people took three tries.
 
 ## Unsigned installers kept desktop users away
 
-The desktop app worked, but I didn't have code-signing certificates, so macOS and Windows both warn on first launch that the developer can't be verified. For a free tool from a stranger, that warning ends the install. I moved the same logic into a Python add-on that runs inside Anki and installs from AnkiWeb, where language learners already get their add-ons. The current repository focuses on the Anki add-on.
+I had no code-signing certificates, so macOS and Windows both warned on first launch that the developer couldn't be verified. For a free tool from a stranger, that warning ends the install. I moved the same logic into an add-on that installs from AnkiWeb, where language learners already get their add-ons.
 
 ## Three ways to get the audio out
 
-The add-on can read an `.apkg` or `.colpkg` without importing it into your collection, export a deck and its subdecks from the deck gear menu, or export selected cards from the Browser. Deck exports include cards currently in a filtered deck; deck and Browser exports read directly from Anki’s media folder.
-
 <Flow
+  parallel
   caption="All three entry points lead to the same export options."
   steps={[
-    { k: '01', title: 'Package file', body: 'Tools → Extract Audio from Package. Read a package without importing it.' },
-    { k: '02', title: 'Deck and subdecks', body: 'Deck gear → Export Audio… Include the whole deck hierarchy.' },
-    { k: '03', title: 'Selected cards', body: 'Browser → Notes → Export Audio from Selected Cards… Use the order shown in the Browser.' },
+    { k: 'Tools menu', title: 'A package file', body: 'Reads an .apkg or .colpkg without importing it into your collection.' },
+    { k: 'Deck gear', title: 'A deck', body: 'Includes subdecks and cards currently in a filtered deck.' },
+    { k: 'Browser', title: 'Selected cards', body: 'Keeps the order shown in the Browser.' },
   ]}
 />
 
-## Names and ordering that make sense outside Anki
+## Names that make sense outside Anki
 
-The original media name is useful to Anki, but a name like `sapi5js-42ecd8a4.mp3` tells me little in a music player. The exporter can name files after a note field or combine several fields with a pattern such as `{Word} ({Reading})`. HTML, sound tags and invalid filename characters are removed. If a chosen field is empty, the original filename is kept.
+Anki's media names tell me little in a music player. The exporter can name each file after a note field, or after several fields combined in a pattern.
 
-For notes with audio in several fields, I can keep word audio and leave example sentences out. Optional numbering follows card order, and deck names can become folders: `Japanese::Vocab` becomes `Japanese/Vocab/`.
+<Rename
+  pattern="{Word} ({Reading})"
+  rows={[
+    {
+      from: 'sapi5js-42ecd8a4.mp3',
+      fields: [{ name: 'Word', value: '猫' }, { name: 'Reading', value: 'neko' }],
+      to: '猫 (neko).mp3',
+    },
+    {
+      from: 'sapi5js-9f31c07b.mp3',
+      fields: [{ name: 'Word', value: '犬' }, { name: 'Reading', value: '' }],
+      to: '犬.mp3',
+      note: 'An empty field is dropped with its separator.',
+    },
+    {
+      from: 'rec-0417.mp3',
+      fields: [{ name: 'Word', value: '' }, { name: 'Reading', value: '' }],
+      to: 'rec-0417.mp3',
+      note: 'Nothing to name it after, so the original name stays.',
+      kept: true,
+    },
+  ]}
+  caption="An example vocabulary deck. HTML, sound tags and characters that file names can't hold are removed."
+/>
 
-Before writing anything, **Preview Names…** shows the resulting filenames and whether each file will be numbered, skipped or replace an existing file. Existing files can be skipped, overwritten or kept alongside a numbered copy. If two files in the same export receive the same name, the later one always gets a number.
+**Preview Names…** lists every new name before anything is written, and marks the files that would be numbered, skipped or replace an existing file.
 
-## Take the study context with the files
+## The export keeps its study context
 
-An optional `audio_notes.csv` records the deck, note type, tags and plain-text fields behind each file. An `audio_playlist.m3u8` keeps the audio in card order without needing numbered filenames, with track titles taken from each note’s first field. That makes the export useful for listening outside Anki while keeping a route back to the original notes.
+<ExportTree
+  items={[
+    { name: 'Export', depth: 0, kind: 'folder' },
+    { name: 'Japanese', depth: 1, kind: 'folder', note: 'Deck names can become folders: Japanese::Vocab.' },
+    { name: 'Vocab', depth: 2, kind: 'folder' },
+    { name: '0001_猫 (neko).mp3', depth: 3, kind: 'audio', note: 'Optional numbers follow card order.' },
+    { name: '0002_犬.mp3', depth: 3, kind: 'audio' },
+    { name: '0003_鳥 (tori).mp3', depth: 3, kind: 'audio' },
+    { name: 'audio_playlist.m3u8', depth: 1, kind: 'list', note: 'Plays in card order, with tracks titled after each note’s first field.' },
+    { name: 'audio_notes.csv', depth: 1, kind: 'sheet', note: 'One row per file: deck, note type, tags and every field as plain text.' },
+  ]}
+  caption="An example export with every option switched on. The playlist and the CSV are optional."
+/>
 
-Reading and extraction run in the background, and export preferences are remembered. Deck and Browser exports also report audio that the cards reference but that is missing from the media folder.
+For notes with audio in several fields, I can keep the word audio and leave the example sentences out. Deck and Browser exports also report audio that cards reference but that is missing from the media folder.
 
 ## Support for current Anki packages
 
-The first extractor only understood the older JSON media map. The current add-on also handles the binary media map and compressed files used by newer Anki exports.
+The first extractor only understood the older JSON media map. The add-on now reads both formats.
 
 <Support
   rows={[
     { label: 'Legacy packages', detail: 'JSON media map · files stored as-is', ok: true },
     { label: 'Modern packages', detail: 'Binary media map · compressed files', ok: true },
     { label: 'Deck and Browser exports', detail: 'Audio read directly from the collection’s media folder', ok: true },
+    { label: 'Anki 2.1.55 and later', detail: 'Tested on Anki 26.09.4', ok: true },
   ]}
-/>
-
-<Stats
-  stats={[
-    { value: '2.1.55+', label: 'Anki versions supported' },
-    { value: '26.09.4', label: 'Anki version tested' },
-  ]}
-  source="Compatibility documented in the current repository README."
 />
 
 The repository includes tests built from real Anki packages, plus dialog and menu tests that run Qt offscreen. See the [repository README](https://github.com/polywertz/anki-audio-extractor#readme) for installation, export options and test instructions.
