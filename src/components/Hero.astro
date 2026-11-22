@@ -1,152 +1,330 @@
 ---
-import { basics } from '../lib/cv';
+// The first screen: the SS mark large in the middle, the name and
+// the role under it, where I'm based, and a chevron down to the work. It sits
+// on the page's own ground (light or dark theme) with animated topographic
+// contours (one WebGL fragment shader) over the site-wide dashed grid. The
+// mark's dots switch on in a diagonal sweep, then a glint crosses it every
+// few seconds (motion.ts).
 import Logo from './Logo.astro';
+import { basics } from '../lib/cv';
 
-const { station, status } = basics;
+const { lat, lon } = basics.station;
 ---
 
-<section class="hero wrap" aria-labelledby="hero-name">
-  <div class="head">
-    <div class="lockup">
-      <Logo size={100} cells={20} dot={0.78} separate class="hero-mark" />
-      <h1 id="hero-name"><span class="line"><span>Sathira</span></span> <span class="line"><span>Williams</span></span></h1>
+<section class="hero" aria-labelledby="hero-title" data-enter>
+  <div class="topo" aria-hidden="true"><canvas data-topo></canvas></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <div class="wrap hero-c">
+    <div class="mark-wrap">
+      <Logo size={260} cells={22} dot={0.8} separate class="hero-mark" />
     </div>
+
+    <h1 id="hero-title"><span class="line"><span>Sathira Williams</span></span></h1>
+
     <div class="side">
-      <p class="label">Based in {station.name}, Canada</p>
-      <h2 class="role">Full-stack developer.<br /><span>From UI to API.</span></h2>
-      <p class="intro">{basics.intro}</p>
-      {
-        status.open && (
-          <p class="status data">
-            <span class="dot" aria-hidden="true" />
-            {status.text} · {status.where}
-          </p>
-        )
-      }
-      <div class="actions">
-        <a class="btn btn-primary" href="#missions">Explore my work <span aria-hidden="true">↓</span></a>
-        <a class="btn" href={basics.resumeUrl} rel="noopener">Résumé <span class="arrow" aria-hidden="true">↗</span></a>
-        <a class="email-link" href={`mailto:${basics.email}`}>Email me ↗</a>
-      </div>
+      <p class="role">Full-stack developer</p>
+      <p class="based">
+        <span class="pin" aria-hidden="true"></span>
+        Based in Vancouver, Canada
+        <span class="coords" aria-hidden="true">{lat.toFixed(2)}° N · {Math.abs(lon).toFixed(2)}° W</span>
+      </p>
     </div>
   </div>
 
-  <div class="proof" aria-label="Background at a glance">
-    <a href="#pass-log"><span class="label">01 · In production</span><strong>Full-Stack Developer</strong><span>Verus Human Optimization <span aria-hidden="true">↗</span></span></a>
-    <a href="/missions/star-sync"><span class="label">02 · Complex systems</span><strong>Canadian Space Agency capstone</strong><span>Satellite scheduling · Next.js + FastAPI <span aria-hidden="true">↗</span></span></a>
-    <a href="#education"><span class="label">03 · Continuing to learn</span><strong>Georgia Tech · M.S. Computer Science</strong><span>In progress · Artificial Intelligence <span aria-hidden="true">↗</span></span></a>
-  </div>
+  <a class="chevron" href="#missions" aria-label="Scroll to my projects">
+    <svg viewBox="0 0 48 24" width="48" height="24" aria-hidden="true"><path d="M6 6l18 12L42 6" /></svg>
+  </a>
 </section>
 
 <style>
-  .head {
+  /* The banner uses the site's own tokens, so it shares the page's ground,
+     ink and accent in both themes. Contours and grid are drawn in --ink-3. */
+  .hero {
+
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    min-height: calc(100svh - 57px);
     display: grid;
-    gap: 32px;
-    padding-block: clamp(32px, 5vw, 64px) clamp(28px, 4vw, 48px);
-  }
-  /* Mark and name as one lockup: the mark runs from the cap line of
-     "Sathira" to the baseline of "Williams", so the pair reads as a block. */
-  .lockup {
-    --size: clamp(3rem, 11.5vw, 8.75rem);
-    display: flex;
-    align-items: flex-start;
-    gap: calc(var(--size) * 0.2);
-    font-size: var(--size);
-  }
-  .lockup :global(.hero-mark) {
-    flex: none;
-    width: 1.62em;
-    height: 1.62em;
-    margin-top: 0.1em;
+    place-items: center;
+    padding-block: 48px 104px;
+    /* see-through, so the page's dashed grid runs through the banner; only
+       a soft patch of ground behind the mark clears it */
+    background: radial-gradient(70% 60% at 50% 45%, var(--bg) 20%, transparent 75%);
     color: var(--ink);
   }
-  h1 {
-    font-size: 1em;
-    line-height: 0.86;
-    letter-spacing: -0.045em;
-    font-weight: 620;
+
+  /* ---- ground: contours, survey grid, grain ---- */
+  .topo,
+  .grain {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
   }
-  /* Each line is its own mask so the name can rise into place. Only the
-     bottom edge clips: overflow: hidden would also cut the last letter,
-     which the tight tracking pushes past the line box. */
+  .topo {
+    z-index: -2;
+    background:
+      radial-gradient(70% 60% at 80% 0%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 70%);
+  }
+  /* the contours and grain thin out over the bottom of the banner, before the first
+     section; the grid underneath carries on */
+  .topo,
+  .grain {
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - clamp(180px, 28svh, 280px)), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - clamp(180px, 28svh, 280px)), transparent);
+  }
+  .topo canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .grain {
+    opacity: 0.09;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .hero-c {
+    display: grid;
+    justify-items: center;
+    text-align: center;
+  }
+
+  /* ---- the mark ---- */
+  .mark-wrap {
+    width: clamp(150px, 24vw, 260px);
+    aspect-ratio: 1;
+    margin-bottom: clamp(28px, 5svh, 48px);
+  }
+  .mark-wrap :global(.hero-mark) {
+    width: 100%;
+    height: 100%;
+    color: var(--ink);
+    filter: drop-shadow(0 0 28px color-mix(in srgb, var(--ink) 12%, transparent));
+  }
+
+  /* ---- name and role ---- */
+  h1 {
+    font-size: clamp(2.5rem, 8vw, 6.5rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+  }
   h1 .line {
     display: block;
-    clip-path: inset(-0.5em -0.5em 0 -0.5em);
-    padding-bottom: 0.06em;
-    margin-bottom: -0.06em;
+    clip-path: inset(-0.3em -0.5em 0 -0.5em);
+    padding-bottom: 0.08em;
+    margin-bottom: -0.08em;
   }
-  h1 .line > span {
-    display: block;
-  }
+  h1 .line > span { display: block; }
   .side {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    max-width: 52ch;
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+    margin-top: 20px;
   }
   .role {
-    font-size: clamp(1.8rem, 3.1vw, 2.75rem);
-    line-height: 1.08;
-    letter-spacing: -0.035em;
+    font-family: var(--font-data);
+    font-size: clamp(0.875rem, 1.4vw, 1.0625rem);
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    padding-left: 0.32em;
   }
-  .proof { display: grid; gap: 24px; padding-block: 24px; border-block: 1px solid var(--rule-strong); }
-  .proof a { text-decoration: none; display: flex; flex-direction: column; gap: 5px; font-size: 0.875rem; color: var(--ink-2); }
-  .proof a:hover strong { color: var(--accent); }
-  .role span { color: var(--ink-2); }
-  .email-link { font-size: 0.875rem; text-underline-offset: 5px; padding: 10px 0; }
-  .proof strong { font-weight: 560; color: var(--ink); }
-  @media (min-width: 760px) { .proof { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-
-  .intro {
-    font-size: 1.0625rem;
-    line-height: 1.5;
-  }
-  .status {
+  .based {
     display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: center;
-    gap: 10px;
+    gap: 6px 12px;
+    font-size: 1rem;
     color: var(--ink-2);
   }
-  .status .dot {
-    width: 8px;
-    height: 8px;
+  .pin {
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
-    background: var(--ok);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--ok) 22%, transparent);
+    background: var(--accent);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 60%, transparent);
+    animation: ping 2.4s ease-out infinite;
   }
-  .actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 6px;
+  @keyframes ping {
+    70%, 100% { box-shadow: 0 0 0 8px transparent; }
   }
+  .coords {
+    font-family: var(--font-data);
+    font-size: 0.75rem;
+    color: var(--ink-3);
+  }
+
+  /* ---- scroll cue ---- */
+  .chevron {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(20px, 5svh, 48px);
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 48px;
+    transform: translateX(-50%);
+    color: var(--ink-2);
+    transition: color 0.2s;
+  }
+  .chevron svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    animation: bob 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+  .chevron:hover { color: var(--accent); }
+  @keyframes bob {
+    0%, 100% { transform: translateY(-4px); }
+    50% { transform: translateY(6px); }
+  }
+
+  /* the header wraps to two rows on phones */
   @media (max-width: 759px) {
-    .head { gap: 24px; }
-    .role { font-size: 2rem; }
-    .actions { gap: 12px; align-items: center; }
-    .actions .btn { padding-inline: 12px; }
-    .proof { gap: 0; padding-block: 0; }
-    .proof a { padding-block: 12px; gap: 3px; }
-    .proof a > .label { display: none; }
-    .proof a > strong { font-size: .875rem; }
-    .proof a + a { border-top: 1px solid var(--rule); }
-    .proof a > span:last-child { font-size: 0.8125rem; }
+    .hero { min-height: calc(100svh - 101px); }
   }
-  @media (min-width: 1000px) {
-    /* Lockup and text centred on each other: the text column is the taller
-       one, so bottom-aligning left a dead band above the name. */
-    .head {
-      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-      align-items: center;
-      gap: clamp(32px, 4vw, 64px);
-    }
-    /* Capped so the text column keeps ~46ch once the page hits max width. */
-    .lockup {
-      --size: clamp(3rem, 7.1vw, 6rem);
-    }
-    .side {
-      justify-self: end;
-    }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pin, .chevron svg { animation: none; }
   }
 </style>
 
+<script>
+  // Contours of a slowly evolving fbm height field, drawn only while the
+  // banner is on screen. Without WebGL the flat charcoal ground shows; under
+  // reduced motion one still frame is drawn.
+  const canvas = document.querySelector<HTMLCanvasElement>('[data-topo]');
+  const host = canvas?.closest<HTMLElement>('.hero');
+  const gl = canvas?.getContext('webgl2', { antialias: false, premultipliedAlpha: true, alpha: true });
+
+  if (canvas && host && gl) {
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const vert = `#version 300 es
+      in vec2 p;
+      void main() { gl_Position = vec4(p, 0.0, 1.0); }`;
+
+    const frag = `#version 300 es
+      precision highp float;
+      uniform vec2 uRes;
+      uniform float uTime;
+      uniform float uScroll;
+      uniform float uDpr;
+      uniform vec3 uLine;
+      out vec4 o;
+
+      vec3 hash3(vec3 p) {
+        p = vec3(dot(p, vec3(127.1, 311.7, 74.7)), dot(p, vec3(269.5, 183.3, 246.1)), dot(p, vec3(113.5, 271.9, 124.6)));
+        return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
+      }
+      float noise(vec3 p) {
+        vec3 i = floor(p), f = fract(p);
+        vec3 u = f * f * (3.0 - 2.0 * f);
+        return mix(mix(mix(dot(hash3(i), f), dot(hash3(i + vec3(1,0,0)), f - vec3(1,0,0)), u.x),
+                       mix(dot(hash3(i + vec3(0,1,0)), f - vec3(0,1,0)), dot(hash3(i + vec3(1,1,0)), f - vec3(1,1,0)), u.x), u.y),
+                   mix(mix(dot(hash3(i + vec3(0,0,1)), f - vec3(0,0,1)), dot(hash3(i + vec3(1,0,1)), f - vec3(1,0,1)), u.x),
+                       mix(dot(hash3(i + vec3(0,1,1)), f - vec3(0,1,1)), dot(hash3(i + vec3(1,1,1)), f - vec3(1,1,1)), u.x), u.y), u.z);
+      }
+      float fbm(vec3 p) {
+        float v = 0.0, a = 0.55;
+        for (int k = 0; k < 4; k++) { v += a * noise(p); p = p * 2.03 + vec3(1.7, 9.2, 0.0); a *= 0.5; }
+        return v;
+      }
+      void main() {
+        vec2 frag = gl_FragCoord.xy / uDpr;
+        vec2 uv = frag / 520.0;
+        uv.y += uScroll / 1400.0;
+        vec3 q = vec3(uv, uTime * 0.035);
+        vec2 warp = vec2(fbm(q + vec3(0.0, 0.0, 3.1)), fbm(q + vec3(5.2, 1.3, 7.7)));
+        float h = fbm(vec3(uv * 1.15 + warp * 0.55, uTime * 0.02));
+
+        float n = h * 16.0;
+        float d = abs(fract(n - 0.5) - 0.5);
+        float line = 1.0 - smoothstep(0.0, fwidth(n) * 1.15, d);
+
+        // every fifth contour is an index line
+        float m = n / 5.0;
+        float di = abs(fract(m - 0.5) - 0.5);
+        float idx = 1.0 - smoothstep(0.0, fwidth(m) * 1.6, di);
+
+        // fade toward the middle so the logo stays clear
+        vec2 c = (frag - uRes * 0.5) / uRes.y;
+        float clear = smoothstep(0.12, 0.55, length(c * vec2(0.8, 1.0)));
+
+        float k = mix(0.35, 1.0, clear);
+        o = vec4(uLine * (line * 0.2 + idx * 0.34) * k, max(line * 0.2, idx * 0.34) * k);
+      }`;
+
+    const sh = (type: number, src: string) => {
+      const s = gl.createShader(type)!;
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s) ?? 'shader');
+      return s;
+    };
+    try {
+      const prog = gl.createProgram()!;
+      gl.attachShader(prog, sh(gl.VERTEX_SHADER, vert));
+      gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, frag));
+      gl.linkProgram(prog);
+      gl.useProgram(prog);
+      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      const loc = gl.getAttribLocation(prog, 'p');
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+      const u = (n: string) => gl.getUniformLocation(prog, n);
+      const uRes = u('uRes'), uTime = u('uTime'), uScroll = u('uScroll'), uDpr = u('uDpr');
+
+      // Lines take the theme's --ink-3, and follow it when the theme changes.
+      const uLine = u('uLine');
+      const tint = () => {
+        const hex = getComputedStyle(host).getPropertyValue('--ink-3').trim().match(/^#?([0-9a-f]{6})$/i);
+        const n = hex ? parseInt(hex[1], 16) : 0x8a857a;
+        gl.uniform3f(uLine, ((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255);
+      };
+      tint();
+
+      let raf = 0, visible = true;
+      const t0 = performance.now() - 40000;
+      const size = () => {
+        const dpr = Math.min(devicePixelRatio || 1, 1.5);
+        const w = host.clientWidth, h = host.clientHeight;
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        gl.uniform2f(uRes, w, h);
+        gl.uniform1f(uDpr, dpr);
+      };
+      const frame = (now: number) => {
+        raf = 0;
+        gl.uniform1f(uTime, still ? 40 : (now - t0) / 1000);
+        gl.uniform1f(uScroll, -scrollY);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        if (!still && visible && !document.hidden) raf = requestAnimationFrame(frame);
+      };
+      const go = () => { if (!raf && visible) raf = requestAnimationFrame(frame); };
+      size();
+      go();
+      new ResizeObserver(() => { size(); go(); }).observe(host);
+      new IntersectionObserver(([e]) => { visible = e.isIntersecting; go(); }).observe(host);
+      addEventListener('scroll', go, { passive: true });
+      const retint = () => { tint(); go(); };
+      new MutationObserver(retint).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+      matchMedia('(prefers-color-scheme: light)').addEventListener('change', retint);
+      document.addEventListener('visibilitychange', go);
+    } catch (e) {
+      console.warn('topo:', e);
+    }
+  }
+</script>
