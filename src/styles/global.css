@@ -1,14 +1,7 @@
-@import '@fontsource-variable/familjen-grotesk/wght.css';
-
-/* Commit Mono 400, subset to ASCII plus the symbols the site uses
-   (© ° · × é – — ← → ↗ ≈ ≤). Rebuild with pyftsubset if you add a symbol. */
-@font-face {
-  font-family: 'Commit Mono';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('../fonts/commit-mono-400-subset.woff2') format('woff2');
-}
+/* One family across the site: Chivo for text and headings, Chivo Mono for
+   labels and data. Both are variable, so weights come from one file each. */
+@import '@fontsource-variable/chivo/wght.css';
+@import '@fontsource-variable/chivo-mono/wght.css';
 
 /* ---------- Tokens ----------
    Night operations by default; a printed ops sheet in light mode.
@@ -27,8 +20,8 @@
   --land: #4a463f;
   --ok: #4fbf6a;
 
-  --font-text: 'Familjen Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
-  --font-data: 'Commit Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-text: 'Chivo Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-data: 'Chivo Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
   --gutter: clamp(16px, 4vw, 48px);
   --max: 1280px;
@@ -107,6 +100,23 @@
   --accent: #e5534b;
   --accent-ink: #0b0e13;
   --land: #353d4a;
+}
+
+/* Home: the site's light and dark grounds with a blue accent instead of
+   the orange, to match the hero banner. */
+[data-palette='home'] {
+  --accent: #5b9bff;
+  --accent-ink: #0f0e0c;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) [data-palette='home'] {
+    --accent: #1f5fd6;
+    --accent-ink: #f1eee6;
+  }
+}
+:root[data-theme='light'] [data-palette='home'] {
+  --accent: #1f5fd6;
+  --accent-ink: #f1eee6;
 }
 
 /* Anki's own palette (desktop canvas greys, primary-button blue), for its case study. */
@@ -218,7 +228,22 @@ html {
     scroll-behavior: smooth;
   }
 }
+/* A dashed survey grid behind every page, in the theme's muted ink. It is a
+   mask over a block of colour so it follows the theme and each page palette,
+   and it scrolls with the page from the top edge. */
+body::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.3;
+  background: var(--ink-3);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cpath d='M0.5 0V200M0 0.5H200' stroke='%23000' stroke-width='1.5' stroke-dasharray='8 7' fill='none'/%3E%3C/svg%3E") center top / 200px 200px;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cpath d='M0.5 0V200M0 0.5H200' stroke='%23000' stroke-width='1.5' stroke-dasharray='8 7' fill='none'/%3E%3C/svg%3E") center top / 200px 200px;
+}
 body {
+  position: relative;
   margin: 0;
   background: var(--bg);
   color: var(--ink);
@@ -285,7 +310,7 @@ p {
 .section {
   padding-block: clamp(56px, 7vw, 88px) 0;
 }
-/* Section head: a mono index on the left, the title on the rule. */
+/* Section head: the title on the rule, a short note beside it. */
 .section-head {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -313,7 +338,7 @@ p {
 }
 @media (min-width: 860px) {
   .section-head {
-    grid-template-columns: 200px minmax(0, 1fr) minmax(0, 0.9fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
     align-items: start;
     gap: 24px;
   }
@@ -365,7 +390,7 @@ p {
   letter-spacing: 0.02em;
   text-decoration: none;
   color: var(--ink);
-  background: transparent;
+  background: var(--bg);
   cursor: pointer;
   transition:
     border-color 0.2s,

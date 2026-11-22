@@ -5,13 +5,13 @@ import { basics, BUILD_TIME } from '../lib/cv';
 import Logo from '../components/Logo.astro';
 import SocialMeta from '../components/SocialMeta.astro';
 import tle from '../data/tle.json';
-import monoUrl from '../fonts/commit-mono-400-subset.woff2?url';
-import textUrl from '@fontsource-variable/familjen-grotesk/files/familjen-grotesk-latin-wght-normal.woff2?url';
+import monoUrl from '@fontsource-variable/chivo-mono/files/chivo-mono-latin-wght-normal.woff2?url';
+import textUrl from '@fontsource-variable/chivo/files/chivo-latin-wght-normal.woff2?url';
 
 interface Props {
   title?: string;
   description?: string;
-  palette?: 'starsync' | 'anki' | 'bluelink';
+  palette?: 'home' | 'starsync' | 'anki' | 'bluelink';
 }
 const { title, description, palette } = Astro.props;
 const pageTitle = title ? `${title} · Sathira Williams` : 'Sathira Williams · Full-stack developer';
