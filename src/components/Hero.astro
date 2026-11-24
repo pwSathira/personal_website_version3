@@ -3,12 +3,22 @@
 // the role under it, where I'm based, and a chevron down to the work. It sits
 // on the page's own ground (light or dark theme) with animated topographic
 // contours (one WebGL fragment shader) over the site-wide dashed grid. The
-// mark's dots switch on in a diagonal sweep, then a glint crosses it every
-// few seconds (motion.ts).
+// mark's dots switch on in a diagonal sweep (motion.ts), then a glint crosses
+// it every few seconds (CSS, below).
 import Logo from './Logo.astro';
 import { basics } from '../lib/cv';
+import { markDots } from '../lib/logo';
 
 const { lat, lon } = basics.station;
+
+// The mark's glow and its glint both see the dots through a static mask of
+// the mark: the glow is blurred once instead of every frame the dots animate,
+// and the glint is a band moving behind the mask, so it runs on the
+// compositor instead of repainting 200+ SVG circles every frame.
+const MARK_CELLS = 22, MARK_DOT = 0.8;
+const { d, cell } = markDots(MARK_CELLS);
+const markSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="${d}" fill="none" stroke="#000" stroke-width="${+(cell * MARK_DOT).toFixed(2)}" stroke-linecap="round"/></svg>`;
+const markMask = `url("data:image/svg+xml,${encodeURIComponent(markSvg)}")`;
 ---
 
 <section class="hero" aria-labelledby="hero-title" data-enter>
@@ -16,8 +26,10 @@ const { lat, lon } = basics.station;
   <div class="grain" aria-hidden="true"></div>
 
   <div class="wrap hero-c">
-    <div class="mark-wrap">
-      <Logo size={260} cells={22} dot={0.8} separate class="hero-mark" />
+    <div class="mark-wrap" style={`--mark: ${markMask}`}>
+      <div class="glow" aria-hidden="true"><span></span></div>
+      <Logo size={260} cells={MARK_CELLS} dot={MARK_DOT} separate class="hero-mark" />
+      <div class="glint" aria-hidden="true"><span></span></div>
     </div>
 
     <h1 id="hero-title"><span class="line"><span>Sathira Williams</span></span></h1>
@@ -51,7 +63,9 @@ const { lat, lon } = basics.station;
     padding-block: 48px 104px;
     /* see-through, so the page's dashed grid runs through the banner; only
        a soft patch of ground behind the mark clears it */
-    background: radial-gradient(70% 60% at 50% 45%, var(--bg) 20%, transparent 75%);
+    background:
+      radial-gradient(70% 60% at 80% 0%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 70%),
+      radial-gradient(70% 60% at 50% 45%, var(--bg) 20%, transparent 75%);
     color: var(--ink);
   }
 
@@ -63,14 +77,10 @@ const { lat, lon } = basics.station;
     z-index: -1;
     pointer-events: none;
   }
-  .topo {
-    z-index: -2;
-    background:
-      radial-gradient(70% 60% at 80% 0%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 70%);
-  }
-  /* the contours and grain thin out over the bottom of the banner, before the first
-     section; the grid underneath carries on */
-  .topo,
+  .topo { z-index: -2; }
+  /* the contours and grain thin out over the bottom of the banner, before the
+     first section; the grid underneath carries on. The contours fade in the
+     shader (uFade), so the animating canvas needs no mask pass each frame. */
   .grain {
     -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - clamp(180px, 28svh, 280px)), transparent);
     mask-image: linear-gradient(to bottom, #000 calc(100% - clamp(180px, 28svh, 280px)), transparent);
@@ -94,6 +104,7 @@ const { lat, lon } = basics.station;
 
   /* ---- the mark ---- */
   .mark-wrap {
+    position: relative;
     width: clamp(150px, 24vw, 260px);
     aspect-ratio: 1;
     margin-bottom: clamp(28px, 5svh, 48px);
@@ -101,8 +112,55 @@ const { lat, lon } = basics.station;
   .mark-wrap :global(.hero-mark) {
     width: 100%;
     height: 100%;
+    position: relative;
     color: var(--ink);
-    filter: drop-shadow(0 0 28px color-mix(in srgb, var(--ink) 12%, transparent));
+  }
+  /* Same as filter: drop-shadow(0 0 28px ink 12%) on the mark (a 28px shadow
+     is a 14px gaussian), but on its own static layer, so the blur isn't
+     recomputed on every frame of the dots' entrance. It rises with the dots
+     to their resting 0.82 opacity. */
+  .glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    filter: blur(14px);
+  }
+  .glow span {
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, var(--ink) 12%, transparent);
+    -webkit-mask: var(--mark) center / 100% 100% no-repeat;
+    mask: var(--mark) center / 100% 100% no-repeat;
+  }
+  :global(html.motion) .glow {
+    opacity: 0.82;
+    animation: glow-in 1.3s cubic-bezier(0.16, 1, 0.3, 1) 0.2s backwards;
+  }
+  @keyframes glow-in {
+    from { opacity: 0; }
+  }
+  /* The dots rest at 0.82 opacity; the band brings them up to full ink as it
+     sweeps from bottom-left to top-right, once every 6.7s. */
+  .glint {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    -webkit-mask: var(--mark) center / 100% 100% no-repeat;
+    mask: var(--mark) center / 100% 100% no-repeat;
+  }
+  .glint span {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, transparent 38%, var(--ink) 50%, transparent 62%);
+    transform: translate(-100%, 100%);
+  }
+  :global(html.motion) .glint span {
+    animation: glint 6.7s cubic-bezier(0.45, 0, 0.55, 1) 2.1s infinite;
+  }
+  @keyframes glint {
+    0% { transform: translate(-100%, 100%); }
+    24%, 100% { transform: translate(100%, -100%); }
   }
 
   /* ---- name and role ---- */
@@ -144,15 +202,25 @@ const { lat, lon } = basics.station;
     color: var(--ink-2);
   }
   .pin {
+    position: relative;
     width: 7px;
     height: 7px;
     border-radius: 50%;
     background: var(--accent);
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 60%, transparent);
+  }
+  /* the ping ring scales and fades (compositor-only), not an animated box-shadow */
+  .pin::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0;
     animation: ping 2.4s ease-out infinite;
   }
   @keyframes ping {
-    70%, 100% { box-shadow: 0 0 0 8px transparent; }
+    0% { transform: scale(1); opacity: 0.6; }
+    70%, 100% { transform: scale(3.3); opacity: 0; }
   }
   .coords {
     font-family: var(--font-data);
@@ -193,17 +261,35 @@ const { lat, lon } = basics.station;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .pin, .chevron svg { animation: none; }
+    .pin::after, .chevron svg, :global(html.motion) .glint span { animation: none; }
   }
 </style>
 
 <script>
   // Contours of a slowly evolving fbm height field, drawn only while the
-  // banner is on screen. Without WebGL the flat charcoal ground shows; under
-  // reduced motion one still frame is drawn.
+  // banner is on screen. Without WebGL the flat ground shows; under reduced
+  // motion one still frame is drawn.
+  //
+  // Cost control, without changing the picture:
+  // - Two passes. The height field is smooth (its finest detail is ~50px),
+  //   so the expensive noise is evaluated on a coarse grid (one sample per
+  //   3 CSS px) into a texture; the second pass interpolates it and draws
+  //   the anti-aliased lines at full resolution. That's ~1/9 of the noise
+  //   work, and the result is indistinguishable from evaluating every pixel.
+  // - It redraws at most 30 times a second (the field drifts slowly), and
+  //   only the rows of the banner that are on screen.
+  // - If frames still come in slow, it steps to a coarser grid and lower
+  //   resolution, and as a last resort freezes into a still frame.
   const canvas = document.querySelector<HTMLCanvasElement>('[data-topo]');
   const host = canvas?.closest<HTMLElement>('.hero');
-  const gl = canvas?.getContext('webgl2', { antialias: false, premultipliedAlpha: true, alpha: true });
+  const gl = canvas?.getContext('webgl2', {
+    antialias: false,
+    premultipliedAlpha: true,
+    alpha: true,
+    depth: false,
+    stencil: false,
+    powerPreference: 'low-power',
+  });
 
   if (canvas && host && gl) {
     const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -212,18 +298,21 @@ const { lat, lon } = basics.station;
       in vec2 p;
       void main() { gl_Position = vec4(p, 0.0, 1.0); }`;
 
-    const frag = `#version 300 es
+    // Pass 1: the height field, one sample per uCell CSS px. Texel i sits at
+    // CSS px i * uCell. h is packed as 16-bit fixed point into RG (RGBA8
+    // render targets work everywhere; float ones need an extension).
+    const fieldFrag = `#version 300 es
       precision highp float;
-      uniform vec2 uRes;
       uniform float uTime;
       uniform float uScroll;
-      uniform float uDpr;
-      uniform vec3 uLine;
+      uniform float uCell;
       out vec4 o;
 
+      // sin-free hash (Dave Hoskins): much cheaper than fract(sin()) on GPUs
       vec3 hash3(vec3 p) {
-        p = vec3(dot(p, vec3(127.1, 311.7, 74.7)), dot(p, vec3(269.5, 183.3, 246.1)), dot(p, vec3(113.5, 271.9, 124.6)));
-        return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
+        p = fract(p * vec3(0.1031, 0.1030, 0.0973));
+        p += dot(p, p.yxz + 33.33);
+        return -1.0 + 2.0 * fract((p.xxy + p.yxx) * p.zyx);
       }
       float noise(vec3 p) {
         vec3 i = floor(p), f = fract(p);
@@ -233,20 +322,55 @@ const { lat, lon } = basics.station;
                    mix(mix(dot(hash3(i + vec3(0,0,1)), f - vec3(0,0,1)), dot(hash3(i + vec3(1,0,1)), f - vec3(1,0,1)), u.x),
                        mix(dot(hash3(i + vec3(0,1,1)), f - vec3(0,1,1)), dot(hash3(i + vec3(1,1,1)), f - vec3(1,1,1)), u.x), u.y), u.z);
       }
-      float fbm(vec3 p) {
+      float fbm(vec3 p, int octaves) {
         float v = 0.0, a = 0.55;
-        for (int k = 0; k < 4; k++) { v += a * noise(p); p = p * 2.03 + vec3(1.7, 9.2, 0.0); a *= 0.5; }
+        for (int k = 0; k < 4; k++) {
+          if (k >= octaves) break;
+          v += a * noise(p); p = p * 2.03 + vec3(1.7, 9.2, 0.0); a *= 0.5;
+        }
         return v;
       }
       void main() {
-        vec2 frag = gl_FragCoord.xy / uDpr;
+        vec2 frag = (gl_FragCoord.xy - 0.5) * uCell;
         vec2 uv = frag / 520.0;
         uv.y += uScroll / 1400.0;
         vec3 q = vec3(uv, uTime * 0.035);
-        vec2 warp = vec2(fbm(q + vec3(0.0, 0.0, 3.1)), fbm(q + vec3(5.2, 1.3, 7.7)));
-        float h = fbm(vec3(uv * 1.15 + warp * 0.55, uTime * 0.02));
+        // the warp is low-frequency, so it needs fewer octaves than the field
+        vec2 warp = vec2(fbm(q + vec3(0.0, 0.0, 3.1), 3), fbm(q + vec3(5.2, 1.3, 7.7), 3));
+        float h = fbm(vec3(uv * 1.15 + warp * 0.55, uTime * 0.02), 4);
+        float x = floor(clamp(h * 0.5 + 0.5, 0.0, 1.0) * 65535.0 + 0.5);
+        float hi = floor(x / 256.0);
+        o = vec4(hi, x - hi * 256.0, 0.0, 255.0) / 255.0;
+      }`;
 
-        float n = h * 16.0;
+    // Pass 2: interpolate the field and draw the contours at full resolution.
+    const lineFrag = `#version 300 es
+      precision highp float;
+      uniform sampler2D uField;
+      uniform float uCell;
+      uniform vec2 uRes;
+      uniform float uDpr;
+      uniform float uFade;
+      uniform vec3 uLine;
+      out vec4 o;
+
+      float H(ivec2 c) {
+        c = clamp(c, ivec2(0), textureSize(uField, 0) - 1);
+        vec2 v = texelFetch(uField, c, 0).rg;
+        return (v.x * 65280.0 + v.y * 255.0) / 65535.0;
+      }
+      void main() {
+        vec2 frag = gl_FragCoord.xy / uDpr;
+
+        // thin out over the bottom of the banner
+        float fade = clamp(frag.y / uFade, 0.0, 1.0);
+        if (fade <= 0.0) { o = vec4(0.0); return; }
+
+        vec2 t = frag / uCell, b = floor(t), f = t - b;
+        ivec2 i = ivec2(b);
+        float v = mix(mix(H(i), H(i + ivec2(1, 0)), f.x), mix(H(i + ivec2(0, 1)), H(i + ivec2(1, 1)), f.x), f.y);
+        float n = (v * 2.0 - 1.0) * 16.0;
+
         float d = abs(fract(n - 0.5) - 0.5);
         float line = 1.0 - smoothstep(0.0, fwidth(n) * 1.15, d);
 
@@ -259,70 +383,177 @@ const { lat, lon } = basics.station;
         vec2 c = (frag - uRes * 0.5) / uRes.y;
         float clear = smoothstep(0.12, 0.55, length(c * vec2(0.8, 1.0)));
 
-        float k = mix(0.35, 1.0, clear);
+        float k = mix(0.35, 1.0, clear) * fade;
         o = vec4(uLine * (line * 0.2 + idx * 0.34) * k, max(line * 0.2, idx * 0.34) * k);
       }`;
 
-    const sh = (type: number, src: string) => {
-      const s = gl.createShader(type)!;
-      gl.shaderSource(s, src);
-      gl.compileShader(s);
-      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s) ?? 'shader');
-      return s;
-    };
-    try {
+    const program = (fs: string) => {
       const prog = gl.createProgram()!;
-      gl.attachShader(prog, sh(gl.VERTEX_SHADER, vert));
-      gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, frag));
+      for (const [type, src] of [[gl.VERTEX_SHADER, vert], [gl.FRAGMENT_SHADER, fs]] as const) {
+        const s = gl.createShader(type)!;
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s) ?? 'shader');
+        gl.attachShader(prog, s);
+      }
+      gl.bindAttribLocation(prog, 0, 'p');
       gl.linkProgram(prog);
-      gl.useProgram(prog);
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog) ?? 'link');
+      const u = (n: string) => gl.getUniformLocation(prog, n);
+      return { prog, u };
+    };
+
+    try {
+      const field = program(fieldFrag);
+      const lines = program(lineFrag);
       gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-      const loc = gl.getAttribLocation(prog, 'p');
-      gl.enableVertexAttribArray(loc);
-      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-      const u = (n: string) => gl.getUniformLocation(prog, n);
-      const uRes = u('uRes'), uTime = u('uTime'), uScroll = u('uScroll'), uDpr = u('uDpr');
+      gl.enableVertexAttribArray(0);
+      gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+      gl.clearColor(0, 0, 0, 0);
+      gl.enable(gl.SCISSOR_TEST);
+
+      const tex = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, tex);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      const fbo = gl.createFramebuffer();
+      gl.useProgram(lines.prog);
+      gl.uniform1i(lines.u('uField'), 0);
 
       // Lines take the theme's --ink-3, and follow it when the theme changes.
-      const uLine = u('uLine');
       const tint = () => {
         const hex = getComputedStyle(host).getPropertyValue('--ink-3').trim().match(/^#?([0-9a-f]{6})$/i);
         const n = hex ? parseInt(hex[1], 16) : 0x8a857a;
-        gl.uniform3f(uLine, ((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255);
+        gl.useProgram(lines.prog);
+        gl.uniform3f(lines.u('uLine'), ((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255);
       };
       tint();
 
-      let raf = 0, visible = true;
-      const t0 = performance.now() - 40000;
+      // Quality ladder: [field cell in CSS px, max canvas px per CSS px].
+      // Slow devices step down it; past the end, the contours stop moving.
+      const top = Math.min(devicePixelRatio || 1, 1.5);
+      const ladder: [number, number][] = [[3, top], [4, Math.min(top, 1)], [6, Math.min(top, 0.75)]];
+      let rung = 0;
+
+      let w = 0, h = 0, fw = 0, fh = 0, scale = 1, cell = 3;
       const size = () => {
-        const dpr = Math.min(devicePixelRatio || 1, 1.5);
-        const w = host.clientWidth, h = host.clientHeight;
-        canvas.width = Math.round(w * dpr);
-        canvas.height = Math.round(h * dpr);
-        gl.viewport(0, 0, canvas.width, canvas.height);
-        gl.uniform2f(uRes, w, h);
-        gl.uniform1f(uDpr, dpr);
+        [cell, scale] = ladder[rung];
+        w = host.clientWidth;
+        h = host.clientHeight;
+        canvas.width = Math.max(1, Math.round(w * scale));
+        canvas.height = Math.max(1, Math.round(h * scale));
+        fw = Math.floor(w / cell) + 2;
+        fh = Math.floor(h / cell) + 2;
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, fw, fh, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+        gl.useProgram(field.prog);
+        gl.uniform1f(field.u('uCell'), cell);
+        gl.useProgram(lines.prog);
+        gl.uniform1f(lines.u('uCell'), cell);
+        gl.uniform2f(lines.u('uRes'), w, h);
+        gl.uniform1f(lines.u('uDpr'), canvas.width / Math.max(1, w));
+        // same band as the grain's mask: clamp(180px, 28svh, 280px)
+        gl.uniform1f(lines.u('uFade'), Math.min(280, Math.max(180, innerHeight * 0.28)));
+        drawn = [0, 0];
       };
+
+      // The band of the banner (CSS px from its top) worth drawing: what's on
+      // screen plus a margin, so a scroll between frames doesn't uncover
+      // undrawn rows.
+      let drawn: [number, number] = [0, 0];
+      const band = (): [number, number] => {
+        const r = host.getBoundingClientRect();
+        const pad = innerHeight * 0.2;
+        return [Math.max(0, -r.top - pad), Math.min(h, innerHeight - r.top + pad)];
+      };
+
+      const render = (t: number, [y0, y1]: [number, number]) => {
+        if (y1 <= y0) return;
+        // GL rows count up from the bottom
+        const lo = h - y1, hi = h - y0;
+        gl.useProgram(field.prog);
+        gl.uniform1f(field.u('uTime'), t);
+        gl.uniform1f(field.u('uScroll'), -scrollY);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+        gl.viewport(0, 0, fw, fh);
+        const f0 = Math.max(0, Math.floor(lo / cell) - 1), f1 = Math.min(fh, Math.ceil(hi / cell) + 2);
+        gl.scissor(0, f0, fw, f1 - f0);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+        gl.useProgram(lines.prog);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        gl.scissor(0, 0, canvas.width, canvas.height);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        const c0 = Math.floor(lo * scale), c1 = Math.ceil(hi * scale);
+        gl.scissor(0, c0, canvas.width, c1 - c0);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        drawn = [y0, y1];
+      };
+
+      const STEP = 1000 / 30; // redraw budget: 30 fps
+      const SLOW = 50;        // a running average above this (ms) means the GPU can't keep up
+      const t0 = performance.now() - 40000;
+      let raf = 0, visible = true, frozen = false, dirty = true;
+      let last = 0, avg = 0, settle = performance.now() + 2000, tStop = 40;
+
+      // Step down the ladder; past the end, stop animating.
+      const slower = () => {
+        if (rung === ladder.length - 1) {
+          frozen = true;
+          removeEventListener('scroll', onScroll);
+        } else {
+          rung++;
+          size();
+        }
+      };
+
       const frame = (now: number) => {
         raf = 0;
-        gl.uniform1f(uTime, still ? 40 : (now - t0) / 1000);
-        gl.uniform1f(uScroll, -scrollY);
-        gl.clearColor(0, 0, 0, 0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-        gl.drawArrays(gl.TRIANGLES, 0, 3);
-        if (!still && visible && !document.hidden) raf = requestAnimationFrame(frame);
+        const live = !still && !frozen && visible && !document.hidden;
+        if (live && last && !dirty && now - last < STEP - 2) {
+          raf = requestAnimationFrame(frame);
+          return;
+        }
+        if (live && last && !dirty && now > settle) {
+          avg = avg ? avg * 0.9 + (now - last) * 0.1 : now - last;
+          if (avg > SLOW) { slower(); avg = 0; settle = now + 1500; }
+        }
+        if (!frozen) tStop = still ? 40 : (now - t0) / 1000;
+        // a still frame isn't redrawn on scroll, so it covers the whole banner
+        render(tStop, live ? band() : [0, h]);
+        dirty = false;
+        if (live && !frozen) {
+          if (!last) settle = Math.max(settle, now + 500); // ignore the hitch of resuming
+          last = now;
+          raf = requestAnimationFrame(frame);
+        } else {
+          last = 0;
+        }
       };
-      const go = () => { if (!raf && visible) raf = requestAnimationFrame(frame); };
+      function go() { if (!raf && visible) raf = requestAnimationFrame(frame); }
+      const redraw = () => { dirty = true; go(); };
+      // A scroll only needs an early frame if it uncovers rows not yet drawn.
+      function onScroll() {
+        const [y0, y1] = band();
+        if (y0 < drawn[0] || y1 > drawn[1]) dirty = true;
+        go();
+      }
+
       size();
       go();
-      new ResizeObserver(() => { size(); go(); }).observe(host);
+      new ResizeObserver(() => { size(); redraw(); }).observe(host);
       new IntersectionObserver(([e]) => { visible = e.isIntersecting; go(); }).observe(host);
-      addEventListener('scroll', go, { passive: true });
-      const retint = () => { tint(); go(); };
+      addEventListener('scroll', onScroll, { passive: true });
+      const retint = () => { tint(); redraw(); };
       new MutationObserver(retint).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
       matchMedia('(prefers-color-scheme: light)').addEventListener('change', retint);
-      document.addEventListener('visibilitychange', go);
+      document.addEventListener('visibilitychange', () => go());
     } catch (e) {
       console.warn('topo:', e);
     }

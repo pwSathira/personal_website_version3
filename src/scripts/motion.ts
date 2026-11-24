@@ -125,29 +125,19 @@ function hero() {
   );
   fadeUp($('.side > *', hero), 0.45, 16, 0.08);
 
-  // The SS mark: dots switch on in a diagonal sweep while the name rises,
-  // then a faint glint crosses the mark every few seconds. Opacity tops out
-  // at 1 and rests at 0.82, so the shimmer stays a highlight, not a blink.
+  // The SS mark: dots switch on in a diagonal sweep while the name rises and
+  // rest at 0.82 opacity. The recurring glint is a CSS band in Hero.astro:
+  // looping transforms on 200+ SVG circles repaints the mark every frame.
   const dots = $<SVGCircleElement>('.hero-mark circle', hero);
   if (dots.length) {
     const key = (c: SVGCircleElement) => Number(c.getAttribute('cx')) + (100 - Number(c.getAttribute('cy')));
     const max = Math.max(...dots.map(key));
     const at = (i: number) => key(dots[i]) / max; // 0 bottom-left … 1 top-right
-    const REST = 0.82;
     animate(
       dots,
-      { opacity: [0, REST], transform: ['scale(0)', 'scale(1)'] },
+      { opacity: [0, 0.82], transform: ['scale(0)', 'scale(1)'] },
       { duration: 0.5, ease: EASE, delay: (i) => 0.2 + at(i) * 0.8 },
-    ).then(() => {
-      // One cycle = a 0.7s glint, then a rest. The rest is part of the
-      // keyframes (not repeatDelay) so the whole thing runs on the compositor.
-      const GLINT = 0.7, CYCLE = 6.7, g = GLINT / CYCLE;
-      animate(
-        dots,
-        { opacity: [REST, 1, REST, REST], transform: ['scale(1)', 'scale(1.18)', 'scale(1)', 'scale(1)'] },
-        { duration: CYCLE, times: [0, g / 2, g, 1], ease: 'easeInOut', delay: (i) => 0.6 + at(i) * 0.9, repeat: Infinity },
-      );
-    });
+    );
   }
 
   const dot = hero.querySelector<HTMLElement>('.status .dot');
